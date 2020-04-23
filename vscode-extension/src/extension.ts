@@ -1,8 +1,15 @@
+/* 
+
+  @todo what-about-omni 
+
+*/
+
 import * as vscode from "vscode";
 import * as fs from "fs";
 import * as p from "path";
 import * as http from "http";
 import { exec } from "child_process";
+import { Pipe, Stream } from "stream";
 const { compileSass, sass } = require("./sass/index");
 const { src, dest } = require("gulp");
 const uglify = require("gulp-uglify");
@@ -55,6 +62,17 @@ const empty = function(code: string) {
   });
   return stream;
 };
+const cbFinished = function() {
+  vscode.window.setStatusBarMessage(`Compile-Hero: successful!`);
+};
+const cbError = function(this: any, e: Error) {
+  console.error(e);
+  vscode.window.setStatusBarMessage(`Compile-Hero: failed!`);
+  vscode.window.showErrorMessage(e.message);
+
+  if (this && this._writableState) this._writableState.finalCalled = true; // cancel further piping.
+};
+
 const readFileName = async (path: string, fileContext: string) => {
   let fileSuffix = fileType(path);
   let config = vscode.workspace.getConfiguration("compile-hero");
@@ -80,12 +98,21 @@ const readFileName = async (path: string, fileContext: string) => {
   };
   if (!compileStatus[fileSuffix]) return;
   let outputPath = p.resolve(path, "../", outputDirectoryPath[fileSuffix]);
+  vscode.window.setStatusBarMessage(`Compiling ...`);
   switch (fileSuffix) {
-    case ".scss":
     case ".sass":
-      let { text } = await compileSass(fileContext, {
+    case ".scss":
+      let done = await compileSass(fileContext, {
+        indentedSyntax: fileSuffix === ".sass" ? 1 : 0,
         style: sass.style.expanded || sass.style.compressed
       });
+
+      if (done.status || done.formatted) {
+        debugger;
+        cbError(new Error('SASS: ' + path + ': ' + (done.message || done.formatted) + (done.line ? ' (@' + done.line + ':' + done.column + ')' : '') ));
+        break;
+      }
+      let text = done.text;
       src(path)
         .pipe(empty(text))
         .pipe(
@@ -95,14 +122,15 @@ const readFileName = async (path: string, fileContext: string) => {
         )
         .pipe(dest(outputPath))
         .pipe(cssmin({ compatibility: "ie7" }))
+        .on('error', cbError)
         .pipe(
           rename({
             extname: ".css",
             suffix: ".min"
           })
         )
-        .pipe(dest(outputPath));
-      vscode.window.setStatusBarMessage(`Compile successfully!`);
+        .pipe(dest(outputPath))
+        .on('finish', cbFinished);
       break;
     case ".js":
       if (/.dev.js|.prod.js$/g.test(path)) {
@@ -117,6 +145,7 @@ const readFileName = async (path: string, fileContext: string) => {
             presets: [babelEnv]
           })
         )
+        .on('error', cbError)
         .pipe(rename({ suffix: ".dev" }))
         .pipe(dest(outputPath));
       src(path)
@@ -125,25 +154,30 @@ const readFileName = async (path: string, fileContext: string) => {
             presets: [babelEnv]
           })
         )
+        .on('error', cbError)
         .pipe(uglify())
+        .on('error', cbError)
         .pipe(rename({ suffix: ".prod" }))
-        .pipe(dest(outputPath));
-      vscode.window.setStatusBarMessage(`Compile successfully!`);
+        .pipe(dest(outputPath))
+        .on('finish', cbFinished);
       break;
     case ".less":
       src(path)
         .pipe(less())
+        .on('error', cbError)
         .pipe(dest(outputPath))
         .pipe(cssmin({ compatibility: "ie7" }))
         .pipe(rename({ suffix: ".min" }))
-        .pipe(dest(outputPath));
-      vscode.window.setStatusBarMessage(`Compile successfully!`);
+        .pipe(dest(outputPath))
+        .on('finish', cbFinished);
+      
       break;
     case ".ts":
       src(path)
         .pipe(ts())
-        .pipe(dest(outputPath));
-      vscode.window.setStatusBarMessage(`Compile successfully!`);
+        .on('error', cbError)
+        .pipe(dest(outputPath))
+        .on('finish', cbFinished);
       break;
     case ".tsx":
       src(path)
@@ -152,8 +186,9 @@ const readFileName = async (path: string, fileContext: string) => {
             jsx: "react"
           })
         )
-        .pipe(dest(outputPath));
-      vscode.window.setStatusBarMessage(`Compile successfully!`);
+        .on('error', cbError)
+        .pipe(dest(outputPath))
+        .on('finish', cbFinished);
       break;
     case ".jade":
       src(path)
@@ -162,12 +197,14 @@ const readFileName = async (path: string, fileContext: string) => {
             pretty: true
           })
         )
+        .on('error', cbError)
         .pipe(dest(outputPath));
       src(path)
         .pipe(jade())
+        .on('error', cbError)
         .pipe(rename({ suffix: ".min" }))
-        .pipe(dest(outputPath));
-      vscode.window.setStatusBarMessage(`Compile successfully!`);
+        .pipe(dest(outputPath))
+        .on('finish', cbFinished);
       break;
     case ".pug":
       src(path)
@@ -175,9 +212,10 @@ const readFileName = async (path: string, fileContext: string) => {
           empty(
             pug.render(readFileContext(path), {
               pretty: true
-            })
+            }, (x: any) => { if (x !== null) cbError(x); } )
           )
         )
+        .on('error', cbError)
         .pipe(
           rename({
             extname: ".html"
@@ -185,17 +223,18 @@ const readFileName = async (path: string, fileContext: string) => {
         )
         .pipe(dest(outputPath))
         .pipe(empty(pug.render(readFileContext(path))))
+        .on('error', cbError)
         .pipe(
           rename({
             suffix: ".min",
             extname: ".html"
           })
         )
-        .pipe(dest(outputPath));
-      vscode.window.setStatusBarMessage(`Compile successfully!`);
+        .pipe(dest(outputPath))
+        .on('finish', cbFinished);
       break;
     default:
-      console.log("Not Found!");
+      console.error("Not Found!");
       break;
   }
 };
@@ -234,7 +273,7 @@ export function activate(context: vscode.ExtensionContext) {
   let makeRequest = vscode.commands.registerCommand(
     "extension.makeRequest",
     async () => {
-      http.get("http://www.umei.cc/p/gaoqing/cn/", (res: any) => {
+      /*http.get("http://www.umei.cc/p/gaoqing/cn/", (res: any) => {
         let rawData = "";
         res.setEncoding("utf8");
         res.on("data", (chunk: any) => {
@@ -243,7 +282,7 @@ export function activate(context: vscode.ExtensionContext) {
         res.on("end", () => {
           console.log(rawData);
         });
-      });
+      });*/
     }
   );
   let compileFile = vscode.commands.registerCommand(
