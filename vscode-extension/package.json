@@ -73,7 +73,6 @@
     "*",
     "onCommand:extension.openInBrowser",
     "onCommand:extension.closePort",
-    "onCommand:extension.makeRequest",
     "onCommand:extension.compileFile"
   ],
   "main": "./out/extension.js",
@@ -86,10 +85,6 @@
       {
         "command": "extension.closePort",
         "title": "Close Port"
-      },
-      {
-        "command": "extension.makeRequest",
-        "title": "Make Request"
       },
       {
         "command": "extension.compileFile",
@@ -227,7 +222,8 @@
     "gulp-uglify": "^3.0.2",
     "open": "^6.4.0",
     "pug": "^2.0.4",
-    "typescript": "^3.3.1"
+    "typescript": "^3.3.1",
+    "yarn": "^1.22.4"
   },
   "devDependencies": {
     "vscode": "^1.1.28"

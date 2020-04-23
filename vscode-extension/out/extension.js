@@ -12,7 +12,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const vscode = require("vscode");
 const fs = require("fs");
 const p = require("path");
-const http = require("http");
 const child_process_1 = require("child_process");
 const { compileSass, sass } = require("./sass/index");
 const { src, dest } = require("gulp");
@@ -66,6 +65,16 @@ const empty = function (code) {
     });
     return stream;
 };
+const cbFinished = function () {
+    vscode.window.setStatusBarMessage(`Compile-Hero: successful!`);
+};
+const cbError = function (e) {
+    console.error(e);
+    vscode.window.setStatusBarMessage(`Compile-Hero: failed!`);
+    vscode.window.showErrorMessage(e.message);
+    if (this && this._writableState)
+        this._writableState.finalCalled = true; // cancel further piping.
+};
 const readFileName = (path, fileContext) => __awaiter(void 0, void 0, void 0, function* () {
     let fileSuffix = fileType(path);
     let config = vscode.workspace.getConfiguration("compile-hero");
@@ -92,12 +101,20 @@ const readFileName = (path, fileContext) => __awaiter(void 0, void 0, void 0, fu
     if (!compileStatus[fileSuffix])
         return;
     let outputPath = p.resolve(path, "../", outputDirectoryPath[fileSuffix]);
+    vscode.window.setStatusBarMessage(`Compiling ...`);
     switch (fileSuffix) {
-        case ".scss":
         case ".sass":
-            let { text } = yield compileSass(fileContext, {
+        case ".scss":
+            let done = yield compileSass(fileContext, {
+                indentedSyntax: fileSuffix === ".sass" ? 1 : 0,
                 style: sass.style.expanded || sass.style.compressed
             });
+            if (done.status || done.formatted) {
+                debugger;
+                cbError(new Error('SASS: ' + path + ': ' + (done.message || done.formatted) + (done.line ? ' (@' + done.line + ':' + done.column + ')' : '')));
+                break;
+            }
+            let text = done.text;
             src(path)
                 .pipe(empty(text))
                 .pipe(rename({
@@ -105,12 +122,13 @@ const readFileName = (path, fileContext) => __awaiter(void 0, void 0, void 0, fu
             }))
                 .pipe(dest(outputPath))
                 .pipe(cssmin({ compatibility: "ie7" }))
+                .on('error', cbError)
                 .pipe(rename({
                 extname: ".css",
                 suffix: ".min"
             }))
-                .pipe(dest(outputPath));
-            vscode.window.setStatusBarMessage(`Compile successfully!`);
+                .pipe(dest(outputPath))
+                .on('finish', cbFinished);
             break;
         case ".js":
             if (/.dev.js|.prod.js$/g.test(path)) {
@@ -121,71 +139,82 @@ const readFileName = (path, fileContext) => __awaiter(void 0, void 0, void 0, fu
                 .pipe(babel({
                 presets: [babelEnv]
             }))
+                .on('error', cbError)
                 .pipe(rename({ suffix: ".dev" }))
                 .pipe(dest(outputPath));
             src(path)
                 .pipe(babel({
                 presets: [babelEnv]
             }))
+                .on('error', cbError)
                 .pipe(uglify())
+                .on('error', cbError)
                 .pipe(rename({ suffix: ".prod" }))
-                .pipe(dest(outputPath));
-            vscode.window.setStatusBarMessage(`Compile successfully!`);
+                .pipe(dest(outputPath))
+                .on('finish', cbFinished);
             break;
         case ".less":
             src(path)
                 .pipe(less())
+                .on('error', cbError)
                 .pipe(dest(outputPath))
                 .pipe(cssmin({ compatibility: "ie7" }))
                 .pipe(rename({ suffix: ".min" }))
-                .pipe(dest(outputPath));
-            vscode.window.setStatusBarMessage(`Compile successfully!`);
+                .pipe(dest(outputPath))
+                .on('finish', cbFinished);
             break;
         case ".ts":
             src(path)
                 .pipe(ts())
-                .pipe(dest(outputPath));
-            vscode.window.setStatusBarMessage(`Compile successfully!`);
+                .on('error', cbError)
+                .pipe(dest(outputPath))
+                .on('finish', cbFinished);
             break;
         case ".tsx":
             src(path)
                 .pipe(ts({
                 jsx: "react"
             }))
-                .pipe(dest(outputPath));
-            vscode.window.setStatusBarMessage(`Compile successfully!`);
+                .on('error', cbError)
+                .pipe(dest(outputPath))
+                .on('finish', cbFinished);
             break;
         case ".jade":
             src(path)
                 .pipe(jade({
                 pretty: true
             }))
+                .on('error', cbError)
                 .pipe(dest(outputPath));
             src(path)
                 .pipe(jade())
+                .on('error', cbError)
                 .pipe(rename({ suffix: ".min" }))
-                .pipe(dest(outputPath));
-            vscode.window.setStatusBarMessage(`Compile successfully!`);
+                .pipe(dest(outputPath))
+                .on('finish', cbFinished);
             break;
         case ".pug":
             src(path)
                 .pipe(empty(pug.render(readFileContext(path), {
                 pretty: true
-            })))
+            }, (x) => { if (x !== null)
+                cbError(x); })))
+                .on('error', cbError)
                 .pipe(rename({
                 extname: ".html"
             }))
                 .pipe(dest(outputPath))
                 .pipe(empty(pug.render(readFileContext(path))))
+                .on('error', cbError)
                 .pipe(rename({
                 suffix: ".min",
                 extname: ".html"
             }))
-                .pipe(dest(outputPath));
-            vscode.window.setStatusBarMessage(`Compile successfully!`);
+                .pipe(dest(outputPath))
+                .on('finish', cbFinished);
             break;
         default:
-            console.log("Not Found!");
+            console.error("Not Found!");
             break;
     }
 });
@@ -205,27 +234,21 @@ function activate(context) {
         });
     });
     let closePort = vscode.commands.registerCommand("extension.closePort", () => __awaiter(this, void 0, void 0, function* () {
-        let inputPort = yield vscode.window.showInputBox({
-            placeHolder: "Enter the port you need to close?"
-        });
-        let info = yield command(`lsof -i :${inputPort}`);
-        let port = transformPort(info);
-        if (port) {
-            yield command(`kill -9 ${port}`);
-            vscode.window.setStatusBarMessage("Port closed successfully!");
+        let platform = process.platform;
+        if (platform !== "win32") { // ---> https://developers.de/blogs/indraneel/archive/2017/10/18/kill-a-process-in-windows-by-port-number.aspx might work
+            let inputPort = yield vscode.window.showInputBox({
+                placeHolder: "Enter the port you need to close?"
+            });
+            let info = yield command(`lsof -i :${inputPort}`);
+            let port = transformPort(info);
+            if (port) {
+                yield command(`kill -9 ${port}`);
+                vscode.window.setStatusBarMessage("Port closed successfully!");
+            }
         }
-    }));
-    let makeRequest = vscode.commands.registerCommand("extension.makeRequest", () => __awaiter(this, void 0, void 0, function* () {
-        http.get("http://www.umei.cc/p/gaoqing/cn/", (res) => {
-            let rawData = "";
-            res.setEncoding("utf8");
-            res.on("data", (chunk) => {
-                rawData += chunk;
-            });
-            res.on("end", () => {
-                console.log(rawData);
-            });
-        });
+        else {
+            vscode.window.showErrorMessage('SORRY. Does not work on Windows. But on OSX/Linux.');
+        }
     }));
     let compileFile = vscode.commands.registerCommand("extension.compileFile", path => {
         let uri = path.fsPath;
@@ -235,7 +258,6 @@ function activate(context) {
     });
     context.subscriptions.push(openInBrowser);
     context.subscriptions.push(closePort);
-    context.subscriptions.push(makeRequest);
     context.subscriptions.push(compileFile);
     vscode.workspace.onDidSaveTextDocument(document => {
         const { fileName } = document;
