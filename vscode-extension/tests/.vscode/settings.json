@@ -1,0 +1,16 @@
+{
+    "compile-hero.jade-output-directory": "./results/",
+    "compile-hero.less-output-directory": "./results/",
+    "compile-hero.pug-output-directory": "./results/",
+    "compile-hero.sass-output-directory": "./results/",
+    "compile-hero.typescript-output-directory": "./results/",
+    "compile-hero.typescriptx-output-directory": "./results/",
+    "compile-hero.javascript-output-directory": "./results/",
+    "compile-hero.jade-output-toggle": true,
+    "compile-hero.javascript-output-toggle": true,
+    "compile-hero.less-output-toggle": true,
+    "compile-hero.pug-output-toggle": true,
+    "compile-hero.sass-output-toggle": true,
+    "compile-hero.typescript-output-toggle": true,
+    "compile-hero.typescriptx-output-toggle": true
+}

@@ -1,0 +1,1 @@
+const a: _ number = 1;
