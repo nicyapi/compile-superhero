@@ -1,8 +1,7 @@
 "use strict";
 /*
 
-  @todo what-about-omni  sass-file-does-not-compile
-
+  @todo what-about-omni
 
 */
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {

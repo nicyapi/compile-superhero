@@ -1,7 +1,6 @@
 /* 
 
-  @todo what-about-omni  sass-file-does-not-compile
-
+  @todo what-about-omni 
 
 */
 
