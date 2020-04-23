@@ -3,6 +3,7 @@ import * as fs from "fs";
 import * as p from "path";
 import { exec } from "child_process";
 import { Pipe, Stream } from "stream";
+import { resolve } from "dns";
 const { compileSass, sass } = require("./sass/index");
 const { src, dest } = require("gulp");
 const uglify = require("gulp-uglify");
@@ -46,6 +47,7 @@ const transformPort = (data: string): string => {
 };
 const empty = function(code: string) {
   let stream = through.obj((file: any, encoding: any, callback: any) => {
+    //debugger;
     if (!file.isBuffer()) {
       return callback();
     }
@@ -54,16 +56,6 @@ const empty = function(code: string) {
     callback();
   });
   return stream;
-};
-const cbFinished = function() {
-  vscode.window.setStatusBarMessage(`Compile-Hero: successful!`);
-};
-const cbError = function(this: any, e: Error) {
-  console.error(e);
-  vscode.window.setStatusBarMessage(`Compile-Hero: failed!`);
-  vscode.window.showErrorMessage(e.message);
-
-  if (this && this._writableState) this._writableState.finalCalled = true; // cancel further piping.
 };
 
 const readFileName = async (path: string, fileContext: string) => {
@@ -90,9 +82,30 @@ const readFileName = async (path: string, fileContext: string) => {
     ".pug": config.get<boolean>("pug-output-toggle")
   };
   if (!compileStatus[fileSuffix]) return;
+
+  let options: any = {
+    "compileErrorMsg": config.get<boolean>("x-show-compileerror-message"),
+    "generateMinifiedHtml": config.get<boolean>("x-generate-minified-html"),
+    "generateHtmlExt": config.get<boolean>("x-generate-html-ext"),
+  }
+
+  const cbFinished = function() {
+    vscode.window.setStatusBarMessage(`Compile-Superhero: successful!`);
+  };
+  const cbError = function(this: any, e: Error) {
+    console.error(e);
+    vscode.window.setStatusBarMessage(`Compile-Superhero: failed!`);
+    if (options.compileErrorMsg)
+      vscode.window.showErrorMessage(e.message);
+  
+    if (this && this._writableState) this._writableState.finalCalled = true; // cancel further piping.
+  };
+  
+
   let outputPath = p.resolve(path, "../", outputDirectoryPath[fileSuffix]);
   vscode.window.setStatusBarMessage(`Compiling ...`);
   switch (fileSuffix) {
+
     case ".sass":
     case ".scss":
       let done = await compileSass(fileContext, {
@@ -101,7 +114,6 @@ const readFileName = async (path: string, fileContext: string) => {
       });
 
       if (done.status || done.formatted) {
-        debugger;
         cbError(new Error('SASS: ' + path + ': ' + (done.message || done.formatted) + (done.line ? ' (@' + done.line + ':' + done.column + ')' : '') ));
         break;
       }
@@ -125,10 +137,12 @@ const readFileName = async (path: string, fileContext: string) => {
         .pipe(dest(outputPath))
         .on('finish', cbFinished);
       break;
+
     case ".js":
       if (/.dev.js|.prod.js$/g.test(path)) {
-        vscode.window.setStatusBarMessage(
-          `The prod or dev file has been processed and will not be compiled`
+        cbFinished();
+        vscode.window.showErrorMessage(
+          'The prod or dev file is the allready processed file and will not be compiled: ' + path
         );
         break;
       }
@@ -141,6 +155,7 @@ const readFileName = async (path: string, fileContext: string) => {
         .on('error', cbError)
         .pipe(rename({ suffix: ".dev" }))
         .pipe(dest(outputPath));
+
       src(path)
         .pipe(
           babel({
@@ -154,6 +169,7 @@ const readFileName = async (path: string, fileContext: string) => {
         .pipe(dest(outputPath))
         .on('finish', cbFinished);
       break;
+
     case ".less":
       src(path)
         .pipe(less())
@@ -163,8 +179,8 @@ const readFileName = async (path: string, fileContext: string) => {
         .pipe(rename({ suffix: ".min" }))
         .pipe(dest(outputPath))
         .on('finish', cbFinished);
-      
       break;
+
     case ".ts":
       src(path)
         .pipe(ts())
@@ -172,6 +188,7 @@ const readFileName = async (path: string, fileContext: string) => {
         .pipe(dest(outputPath))
         .on('finish', cbFinished);
       break;
+
     case ".tsx":
       src(path)
         .pipe(
@@ -183,7 +200,15 @@ const readFileName = async (path: string, fileContext: string) => {
         .pipe(dest(outputPath))
         .on('finish', cbFinished);
       break;
+
     case ".jade":
+      if (options.generateMinifiedHtml)
+        src(path)
+          .pipe(jade())
+          .on('error', cbError)
+          .pipe(rename({ suffix: ".min", extname: options.generateHtmlExt }))
+          .pipe(dest(outputPath));
+
       src(path)
         .pipe(
           jade({
@@ -191,48 +216,59 @@ const readFileName = async (path: string, fileContext: string) => {
           })
         )
         .on('error', cbError)
-        .pipe(dest(outputPath));
-      src(path)
-        .pipe(jade())
-        .on('error', cbError)
-        .pipe(rename({ suffix: ".min" }))
+        .pipe(rename({ extname: options.generateHtmlExt }))
         .pipe(dest(outputPath))
         .on('finish', cbFinished);
       break;
+
     case ".pug":
+      if (options.generateMinifiedHtml)
+        src(path)
+          .pipe(
+            empty(
+              await new Promise<string>((resolve, reject) => {
+                pug.render(readFileContext(path), {
+                  pretty: false
+                }, (err: any, data: string) => { if (err) {cbError(err); reject(err);} else resolve(data); } )
+              })
+            )
+          )
+          .on('error', cbError)
+          .pipe(
+            rename({
+              suffix: ".min",
+              extname: options.generateHtmlExt
+            })
+          )
+          .pipe(dest(outputPath));
+
       src(path)
         .pipe(
           empty(
-            pug.render(readFileContext(path), {
-              pretty: true
-            }, (x: any) => { if (x !== null) cbError(x); } )
+            await new Promise<string>((resolve, reject) => {
+              pug.render(readFileContext(path), {
+                pretty: true
+              }, (err: any, data: string) => { if (err) {cbError(err); reject(err);} else resolve(data); } )
+            })
           )
         )
         .on('error', cbError)
         .pipe(
           rename({
-            extname: ".html"
-          })
-        )
-        .pipe(dest(outputPath))
-        .pipe(empty(pug.render(readFileContext(path))))
-        .on('error', cbError)
-        .pipe(
-          rename({
-            suffix: ".min",
-            extname: ".html"
+            extname: options.generateHtmlExt
           })
         )
         .pipe(dest(outputPath))
         .on('finish', cbFinished);
       break;
+
     default:
       console.error("Not Found!");
       break;
   }
 };
 export function activate(context: vscode.ExtensionContext) {
-  console.log('Congratulations, your extension "qf" is now active!');
+  console.log('Extension "compile-superhero" is ready now!');
   let openInBrowser = vscode.commands.registerCommand(
     "extension.openInBrowser",
     path => {
@@ -291,4 +327,3 @@ export function activate(context: vscode.ExtensionContext) {
   });
 }
 export function deactivate() {}
-

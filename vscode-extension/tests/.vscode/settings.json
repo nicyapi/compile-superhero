@@ -12,5 +12,6 @@
     "compile-hero.pug-output-toggle": true,
     "compile-hero.sass-output-toggle": true,
     "compile-hero.typescript-output-toggle": true,
-    "compile-hero.typescriptx-output-toggle": true
+    "compile-hero.typescriptx-output-toggle": true,
+    "compile-hero.x-generate-minified-html": true
 }

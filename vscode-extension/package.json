@@ -15,7 +15,7 @@
     }
   ],
   "publisher": "BananaAcid",
-  "version": "10.0.2",
+  "version": "10.0.3",
   "preview": true,
   "icon": "logos/hero2.png",
   "homepage": "https://github.com/BananaAcid/compile-superhero",
@@ -85,78 +85,95 @@
       }
     ],
     "configuration": {
-      "title": "Compile hero configuration",
+      "title": "Compile Superhero configuration",
       "properties": {
         "compile-hero.javascript-output-directory": {
           "type": "string",
           "default": "./dist",
-          "description": "Set the directory to output after compiling javascript."
+          "description": "The output directory for compiled javascript."
         },
         "compile-hero.sass-output-directory": {
           "type": "string",
           "default": "./dist",
-          "description": "Set the directory to output after compiling sass."
+          "description": "The output directory for compiled scss and sass."
         },
         "compile-hero.less-output-directory": {
           "type": "string",
           "default": "./dist",
-          "description": "Set the directory to output after compiling less."
+          "description": "The output directory for compiled less."
         },
         "compile-hero.jade-output-directory": {
           "type": "string",
           "default": "./dist",
-          "description": "Set the directory to output after compiling jade."
+          "description": "The output directory for compiled jade."
         },
         "compile-hero.typescript-output-directory": {
           "type": "string",
           "default": "./dist",
-          "description": "Set the directory to output after compiling typescript."
+          "description": "The output directory for compiled typescript."
         },
         "compile-hero.typescriptx-output-directory": {
           "type": "string",
           "default": "./dist",
-          "description": "Set the directory to output after compiling typescriptx."
+          "description": "The output directory for compiled typescriptx."
         },
         "compile-hero.pug-output-directory": {
           "type": "string",
           "default": "./dist",
-          "description": "Set the directory to output after compiling pug."
+          "description": "The output directory for compiled pug."
         },
         "compile-hero.javascript-output-toggle": {
           "type": "boolean",
           "default": true,
-          "description": "Switch to control the compilation of javascript."
+          "description": "Enable to compile javascript."
         },
         "compile-hero.sass-output-toggle": {
           "type": "boolean",
           "default": true,
-          "description": "Switch to control the compilation of sass."
+          "description": "Enable to compile scss and sass."
         },
         "compile-hero.less-output-toggle": {
           "type": "boolean",
           "default": true,
-          "description": "Switch to control the compilation of less."
+          "description": "Enable to compile less."
         },
         "compile-hero.jade-output-toggle": {
           "type": "boolean",
           "default": true,
-          "description": "Switch to control the compilation of jade."
+          "description": "Enable to compile jade."
         },
         "compile-hero.typescript-output-toggle": {
           "type": "boolean",
           "default": true,
-          "description": "Switch to control the compilation of typescript."
+          "description": "Enable to compile typescript."
         },
         "compile-hero.typescriptx-output-toggle": {
           "type": "boolean",
           "default": true,
-          "description": "Switch to control the compilation of typescriptx."
+          "description": "Enable to compile typescriptx."
         },
         "compile-hero.pug-output-toggle": {
           "type": "boolean",
           "default": true,
-          "description": "Switch to control the compilation of pug."
+          "description": "Enable to compile pug."
+        },
+
+        "compile-hero.x-show-compileerror-message": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable to show compile error messages in VSCode."
+        },
+        "compile-hero.x-generate-minified-html": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable to also generate minified HTML (*.min.html) files."
+        },
+        "compile-hero.x-generate-html-ext": {
+          "type": "string",
+          "default": ".html",
+          "description": "The default file extension for compiled HTML (*.html) files."
         }
+
       }
     },
     "menus": {
@@ -195,8 +212,8 @@
   "scripts": {
     "build": "vsce package",
     "vscode:prepublish": "yarn run compile",
-    "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./",
+    "compile": "tsc --project ./src/tsconfig.json",
+    "watch": "tsc -watch --project ./src/tsconfig.json",
     "postinstall": "node ./node_modules/vscode/bin/install",
     "test": "yarn run compile && node ./node_modules/vscode/bin/test"
   },

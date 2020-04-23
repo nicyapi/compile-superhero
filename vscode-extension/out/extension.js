@@ -56,6 +56,7 @@ const transformPort = (data) => {
 };
 const empty = function (code) {
     let stream = through.obj((file, encoding, callback) => {
+        //debugger;
         if (!file.isBuffer()) {
             return callback();
         }
@@ -64,16 +65,6 @@ const empty = function (code) {
         callback();
     });
     return stream;
-};
-const cbFinished = function () {
-    vscode.window.setStatusBarMessage(`Compile-Hero: successful!`);
-};
-const cbError = function (e) {
-    console.error(e);
-    vscode.window.setStatusBarMessage(`Compile-Hero: failed!`);
-    vscode.window.showErrorMessage(e.message);
-    if (this && this._writableState)
-        this._writableState.finalCalled = true; // cancel further piping.
 };
 const readFileName = (path, fileContext) => __awaiter(void 0, void 0, void 0, function* () {
     let fileSuffix = fileType(path);
@@ -100,6 +91,22 @@ const readFileName = (path, fileContext) => __awaiter(void 0, void 0, void 0, fu
     };
     if (!compileStatus[fileSuffix])
         return;
+    let options = {
+        "compileErrorMsg": config.get("x-show-compileerror-message"),
+        "generateMinifiedHtml": config.get("x-generate-minified-html"),
+        "generateHtmlExt": config.get("x-generate-html-ext"),
+    };
+    const cbFinished = function () {
+        vscode.window.setStatusBarMessage(`Compile-Superhero: successful!`);
+    };
+    const cbError = function (e) {
+        console.error(e);
+        vscode.window.setStatusBarMessage(`Compile-Superhero: failed!`);
+        if (options.compileErrorMsg)
+            vscode.window.showErrorMessage(e.message);
+        if (this && this._writableState)
+            this._writableState.finalCalled = true; // cancel further piping.
+    };
     let outputPath = p.resolve(path, "../", outputDirectoryPath[fileSuffix]);
     vscode.window.setStatusBarMessage(`Compiling ...`);
     switch (fileSuffix) {
@@ -110,7 +117,6 @@ const readFileName = (path, fileContext) => __awaiter(void 0, void 0, void 0, fu
                 style: sass.style.expanded || sass.style.compressed
             });
             if (done.status || done.formatted) {
-                debugger;
                 cbError(new Error('SASS: ' + path + ': ' + (done.message || done.formatted) + (done.line ? ' (@' + done.line + ':' + done.column + ')' : '')));
                 break;
             }
@@ -132,7 +138,8 @@ const readFileName = (path, fileContext) => __awaiter(void 0, void 0, void 0, fu
             break;
         case ".js":
             if (/.dev.js|.prod.js$/g.test(path)) {
-                vscode.window.setStatusBarMessage(`The prod or dev file has been processed and will not be compiled`);
+                cbFinished();
+                vscode.window.showErrorMessage('The prod or dev file is the allready processed file and will not be compiled: ' + path);
                 break;
             }
             src(path)
@@ -180,35 +187,54 @@ const readFileName = (path, fileContext) => __awaiter(void 0, void 0, void 0, fu
                 .on('finish', cbFinished);
             break;
         case ".jade":
+            if (options.generateMinifiedHtml)
+                src(path)
+                    .pipe(jade())
+                    .on('error', cbError)
+                    .pipe(rename({ suffix: ".min", extname: options.generateHtmlExt }))
+                    .pipe(dest(outputPath));
             src(path)
                 .pipe(jade({
                 pretty: true
             }))
                 .on('error', cbError)
-                .pipe(dest(outputPath));
-            src(path)
-                .pipe(jade())
-                .on('error', cbError)
-                .pipe(rename({ suffix: ".min" }))
+                .pipe(rename({ extname: options.generateHtmlExt }))
                 .pipe(dest(outputPath))
                 .on('finish', cbFinished);
             break;
         case ".pug":
+            if (options.generateMinifiedHtml)
+                src(path)
+                    .pipe(empty(yield new Promise((resolve, reject) => {
+                    pug.render(readFileContext(path), {
+                        pretty: false
+                    }, (err, data) => { if (err) {
+                        cbError(err);
+                        reject(err);
+                    }
+                    else
+                        resolve(data); });
+                })))
+                    .on('error', cbError)
+                    .pipe(rename({
+                    suffix: ".min",
+                    extname: options.generateHtmlExt
+                }))
+                    .pipe(dest(outputPath));
             src(path)
-                .pipe(empty(pug.render(readFileContext(path), {
-                pretty: true
-            }, (x) => { if (x !== null)
-                cbError(x); })))
+                .pipe(empty(yield new Promise((resolve, reject) => {
+                pug.render(readFileContext(path), {
+                    pretty: true
+                }, (err, data) => { if (err) {
+                    cbError(err);
+                    reject(err);
+                }
+                else
+                    resolve(data); });
+            })))
                 .on('error', cbError)
                 .pipe(rename({
-                extname: ".html"
-            }))
-                .pipe(dest(outputPath))
-                .pipe(empty(pug.render(readFileContext(path))))
-                .on('error', cbError)
-                .pipe(rename({
-                suffix: ".min",
-                extname: ".html"
+                extname: options.generateHtmlExt
             }))
                 .pipe(dest(outputPath))
                 .on('finish', cbFinished);
@@ -219,7 +245,7 @@ const readFileName = (path, fileContext) => __awaiter(void 0, void 0, void 0, fu
     }
 });
 function activate(context) {
-    console.log('Congratulations, your extension "qf" is now active!');
+    console.log('Extension "compile-superhero" is ready now!');
     let openInBrowser = vscode.commands.registerCommand("extension.openInBrowser", path => {
         let uri = path.fsPath;
         let platform = process.platform;
