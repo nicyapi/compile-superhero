@@ -4,10 +4,11 @@
 <a href="https://github.com/Wscats/compile-hero"><img src="https://img.shields.io/badge/Github Page-Wscats-yellow" alt="Github Page" /></a>
 <a href="https://github.com/Wscats"><img src="https://img.shields.io/badge/Author-Eno Yao-blueviolet" alt="Eno Yao" /></a>
 <a href="https://github.com/Wscats"><img src="https://api.netlify.com/api/v1/badges/b652768b-1673-42cd-98dd-3fd807b2ebca/deploy-status" alt="Status" /></a>
--->
-
 
 [English](https://github.com/Wscats/compile-hero/blob/master/vscode-extension/README.md)
+
+-->
+
 
 # Features
 
@@ -23,10 +24,12 @@ Compared to compile-hero:
 - Removed necessary files
 - Added test files
 
+# Super Compiler
+
 
 Easily work with `less, sass, scss, typescript, jade, pug and jsx` files in Visual Studio Code.
 
-Compile on save `(ctrl+s)` for `less, sass, scss, typescript, jade, pug and jsx` files without using a build task.
+Compile on save `(ctrl+s)` or select `Compile File(s)` on right-click menu item for `less, sass, scss, typescript, jade, pug and jsx` files without using a build task.
 
 <img src="https://wscats.github.io/compile-hero/vscode-extension/screenshots/1.gif" />
 
