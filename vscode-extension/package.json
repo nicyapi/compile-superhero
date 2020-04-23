@@ -7,11 +7,13 @@
     "email": "info+repo@nabil-redmann.de",
     "url": "https://github.com/BananaAcid"
   },
-  "contributors": [{
-    "name": "Eno Yao",
-    "email": "kalone.cool@gmail.com",
-    "url": "https://github.com/Wscats"
-  }],
+  "contributors": [
+    {
+      "name": "Eno Yao",
+      "email": "kalone.cool@gmail.com",
+      "url": "https://github.com/Wscats"
+    }
+  ],
   "publisher": "BananaAcid",
   "version": "10.0.0",
   "preview": true,
