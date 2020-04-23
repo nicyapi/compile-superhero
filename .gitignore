@@ -1,2 +1,4 @@
+# ./out/sass/sass.sync.js ->  This is is critical and cannot be removed
 node_modules
-.DS_Store
+.vscode-test/
+*.vsix

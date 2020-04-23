@@ -26,7 +26,6 @@ Compared to compile-hero:
 
 # Super Compiler
 
-
 Easily work with `less, sass, scss, typescript, jade, pug and jsx` files in Visual Studio Code.
 
 Compile on save `(ctrl+s)` or select `Compile File(s)` on right-click menu item for `less, sass, scss, typescript, jade, pug and jsx` files without using a build task.
@@ -58,7 +57,6 @@ Easy to use. When you writing a file, press save `ctrl+s` to generate the compil
 Click to open the extension management interface `Configure Extension Settings`, You can change the path of the project compilation directory, or toggle the switch of language.
 
 <img src="https://BananaAcid.github.io/compile-superhero/vscode-extension/screenshots/5.gif" />
-
 # Open In Browser
 
 Right click the `html` file in the directory menu, and the `open in browser` option will appear. You can preview the page in the chrome browser only.
