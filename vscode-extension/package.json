@@ -73,7 +73,6 @@
     "*",
     "onCommand:extension.openInBrowser",
     "onCommand:extension.closePort",
-    "onCommand:extension.makeRequest",
     "onCommand:extension.compileFile"
   ],
   "main": "./out/extension.js",
@@ -86,10 +85,6 @@
       {
         "command": "extension.closePort",
         "title": "Close Port"
-      },
-      {
-        "command": "extension.makeRequest",
-        "title": "Make Request"
       },
       {
         "command": "extension.compileFile",

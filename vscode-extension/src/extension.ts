@@ -231,21 +231,6 @@ export function activate(context: vscode.ExtensionContext) {
       }
     }
   );
-  let makeRequest = vscode.commands.registerCommand(
-    "extension.makeRequest",
-    async () => {
-      http.get("http://www.umei.cc/p/gaoqing/cn/", (res: any) => {
-        let rawData = "";
-        res.setEncoding("utf8");
-        res.on("data", (chunk: any) => {
-          rawData += chunk;
-        });
-        res.on("end", () => {
-          console.log(rawData);
-        });
-      });
-    }
-  );
   let compileFile = vscode.commands.registerCommand(
     "extension.compileFile",
     path => {
@@ -258,7 +243,6 @@ export function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(openInBrowser);
   context.subscriptions.push(closePort);
-  context.subscriptions.push(makeRequest);
   context.subscriptions.push(compileFile);
   vscode.workspace.onDidSaveTextDocument(document => {
     const { fileName } = document;
