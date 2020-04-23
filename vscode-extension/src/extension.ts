@@ -278,24 +278,6 @@ export function activate(context: vscode.ExtensionContext) {
       }
     }
   );
-<<<<<<< HEAD
-  let makeRequest = vscode.commands.registerCommand(
-    "extension.makeRequest",
-    async () => {
-      /*http.get("http://www.umei.cc/p/gaoqing/cn/", (res: any) => {
-        let rawData = "";
-        res.setEncoding("utf8");
-        res.on("data", (chunk: any) => {
-          rawData += chunk;
-        });
-        res.on("end", () => {
-          console.log(rawData);
-        });
-      });*/
-    }
-  );
-=======
->>>>>>> bugfix/dubious-fn
   let compileFile = vscode.commands.registerCommand(
     "extension.compileFile",
     path => {
@@ -316,3 +298,4 @@ export function activate(context: vscode.ExtensionContext) {
   });
 }
 export function deactivate() {}
+

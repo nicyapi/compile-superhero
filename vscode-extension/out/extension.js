@@ -239,27 +239,21 @@ function activate(context) {
         });
     });
     let closePort = vscode.commands.registerCommand("extension.closePort", () => __awaiter(this, void 0, void 0, function* () {
-        let inputPort = yield vscode.window.showInputBox({
-            placeHolder: "Enter the port you need to close?"
-        });
-        let info = yield command(`lsof -i :${inputPort}`);
-        let port = transformPort(info);
-        if (port) {
-            yield command(`kill -9 ${port}`);
-            vscode.window.setStatusBarMessage("Port closed successfully!");
+        let platform = process.platform;
+        if (platform !== "win32") { // ---> https://developers.de/blogs/indraneel/archive/2017/10/18/kill-a-process-in-windows-by-port-number.aspx might work
+            let inputPort = yield vscode.window.showInputBox({
+                placeHolder: "Enter the port you need to close?"
+            });
+            let info = yield command(`lsof -i :${inputPort}`);
+            let port = transformPort(info);
+            if (port) {
+                yield command(`kill -9 ${port}`);
+                vscode.window.setStatusBarMessage("Port closed successfully!");
+            }
         }
-    }));
-    let makeRequest = vscode.commands.registerCommand("extension.makeRequest", () => __awaiter(this, void 0, void 0, function* () {
-        /*http.get("http://www.umei.cc/p/gaoqing/cn/", (res: any) => {
-          let rawData = "";
-          res.setEncoding("utf8");
-          res.on("data", (chunk: any) => {
-            rawData += chunk;
-          });
-          res.on("end", () => {
-            console.log(rawData);
-          });
-        });*/
+        else {
+            vscode.window.showErrorMessage('SORRY. Does not work on Windows. But on OSX/Linux.');
+        }
     }));
     let compileFile = vscode.commands.registerCommand("extension.compileFile", path => {
         let uri = path.fsPath;
@@ -269,7 +263,6 @@ function activate(context) {
     });
     context.subscriptions.push(openInBrowser);
     context.subscriptions.push(closePort);
-    context.subscriptions.push(makeRequest);
     context.subscriptions.push(compileFile);
     vscode.workspace.onDidSaveTextDocument(document => {
         const { fileName } = document;
