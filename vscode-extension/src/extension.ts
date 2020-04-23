@@ -259,14 +259,22 @@ export function activate(context: vscode.ExtensionContext) {
   let closePort = vscode.commands.registerCommand(
     "extension.closePort",
     async () => {
-      let inputPort = await vscode.window.showInputBox({
-        placeHolder: "Enter the port you need to close?"
-      });
-      let info = await command(`lsof -i :${inputPort}`);
-      let port = transformPort(info);
-      if (port) {
-        await command(`kill -9 ${port}`);
-        vscode.window.setStatusBarMessage("Port closed successfully!");
+      let platform = process.platform;
+
+      if (platform !== "win32") {    // ---> https://developers.de/blogs/indraneel/archive/2017/10/18/kill-a-process-in-windows-by-port-number.aspx might work
+
+        let inputPort = await vscode.window.showInputBox({
+          placeHolder: "Enter the port you need to close?"
+        });
+        let info = await command(`lsof -i :${inputPort}`);
+        let port = transformPort(info);
+        if (port) {
+          await command(`kill -9 ${port}`);
+          vscode.window.setStatusBarMessage("Port closed successfully!");
+        }
+      }
+      else {
+        vscode.window.showErrorMessage('SORRY. Does not work on Windows. But on OSX/Linux.');
       }
     }
   );
