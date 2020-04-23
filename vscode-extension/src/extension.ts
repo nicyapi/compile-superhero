@@ -102,10 +102,9 @@ const readFileName = async (path: string, fileContext: string) => {
   vscode.window.setStatusBarMessage(`Compiling ...`);
   switch (fileSuffix) {
     case ".sass":
-      vscode.window.showErrorMessage('SORRY. SASS FILES ARE NOT SUPPORTED.');
-      break;
     case ".scss":
       let done = await compileSass(fileContext, {
+        indentedSyntax: fileSuffix === ".sass" ? 1 : 0,
         style: sass.style.expanded || sass.style.compressed
       });
 
