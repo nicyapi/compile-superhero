@@ -1,27 +1,32 @@
 {
-  "name": "qf",
-  "displayName": "Sass/Less/Typescript/Jade/Pug Compile Hero",
-  "description": "Easy to compile ts, tsx, scss, less, jade, pug and es6+ on save without using a build task.",
+  "name": "compile-superhero",
+  "displayName": "Sass/Less/Typescript/Jade/Pug Compile-SuperHero",
+  "description": "Really easy to compile ts, tsx, scss, less, jade, pug and es6+ on save, without using a build task.",
   "author": {
+    "name": "Nabil Redmann",
+    "email": "info+repo@nabil-redmann.de",
+    "url": "https://github.com/BananaAcid"
+  },
+  "contributers": [{
     "name": "Eno Yao",
     "email": "kalone.cool@gmail.com",
     "url": "https://github.com/Wscats"
-  },
-  "publisher": "Wscats",
-  "version": "6.8.46",
+  }],
+  "publisher": "BananaAcid",
+  "version": "10.0.0",
   "preview": true,
   "icon": "logos/hero2.png",
-  "homepage": "https://github.com/Wscats/compile-hero",
+  "homepage": "https://github.com/BananaAcid/compile-superhero",
   "engines": {
     "vscode": "^1.39.0"
   },
   "bugs": {
-    "url": "https://github.com/Wscats/compile-hero/issues/new"
+    "url": "https://github.com/BananaAcid/compile-superhero/issues/new"
   },
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Wscats/compile-hero"
+    "url": "https://github.com/BananaAcid/compile-superhero"
   },
   "categories": [
     "Other",
@@ -32,21 +37,8 @@
     "Formatters"
   ],
   "keywords": [
-    "1000phone",
-    "千锋",
-    "千锋互联",
-    "千锋教育",
-    "mobiletrain",
-    "老谢",
-    "老姚",
-    "琳姐",
-    "文婧",
-    "测评",
-    "自动测评",
     "qf",
     "qianfeng",
-    "千峰",
-    "前锋",
     "sass",
     "scss",
     "css",
@@ -63,11 +55,10 @@
     "jade",
     "hero",
     "编译",
-    "close",
-    "port",
     "pug",
     "easy sass",
-    "easy"
+    "easy",
+    "bananaacid"
   ],
   "activationEvents": [
     "*",
