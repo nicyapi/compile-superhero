@@ -18,7 +18,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const vscode = require("vscode");
 const fs = require("fs");
 const p = require("path");
-const http = require("http");
 const child_process_1 = require("child_process");
 const { compileSass, sass } = require("./sass/index");
 const { src, dest } = require("gulp");
@@ -110,8 +109,10 @@ const readFileName = (path, fileContext) => __awaiter(void 0, void 0, void 0, fu
     let outputPath = p.resolve(path, "../", outputDirectoryPath[fileSuffix]);
     vscode.window.setStatusBarMessage(`Compiling ...`);
     switch (fileSuffix) {
-        case ".scss":
         case ".sass":
+            vscode.window.showErrorMessage('SORRY. SASS FILES ARE NOT SUPPORTED.');
+            break;
+        case ".scss":
             let done = yield compileSass(fileContext, {
                 style: sass.style.expanded || sass.style.compressed
             });
@@ -251,16 +252,16 @@ function activate(context) {
         }
     }));
     let makeRequest = vscode.commands.registerCommand("extension.makeRequest", () => __awaiter(this, void 0, void 0, function* () {
-        http.get("http://www.umei.cc/p/gaoqing/cn/", (res) => {
-            let rawData = "";
-            res.setEncoding("utf8");
-            res.on("data", (chunk) => {
-                rawData += chunk;
-            });
-            res.on("end", () => {
-                console.log(rawData);
-            });
-        });
+        /*http.get("http://www.umei.cc/p/gaoqing/cn/", (res: any) => {
+          let rawData = "";
+          res.setEncoding("utf8");
+          res.on("data", (chunk: any) => {
+            rawData += chunk;
+          });
+          res.on("end", () => {
+            console.log(rawData);
+          });
+        });*/
     }));
     let compileFile = vscode.commands.registerCommand("extension.compileFile", path => {
         let uri = path.fsPath;

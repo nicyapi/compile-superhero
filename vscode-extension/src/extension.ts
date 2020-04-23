@@ -101,8 +101,10 @@ const readFileName = async (path: string, fileContext: string) => {
   let outputPath = p.resolve(path, "../", outputDirectoryPath[fileSuffix]);
   vscode.window.setStatusBarMessage(`Compiling ...`);
   switch (fileSuffix) {
-    case ".scss":
     case ".sass":
+      vscode.window.showErrorMessage('SORRY. SASS FILES ARE NOT SUPPORTED.');
+      break;
+    case ".scss":
       let done = await compileSass(fileContext, {
         style: sass.style.expanded || sass.style.compressed
       });
@@ -273,7 +275,7 @@ export function activate(context: vscode.ExtensionContext) {
   let makeRequest = vscode.commands.registerCommand(
     "extension.makeRequest",
     async () => {
-      http.get("http://www.umei.cc/p/gaoqing/cn/", (res: any) => {
+      /*http.get("http://www.umei.cc/p/gaoqing/cn/", (res: any) => {
         let rawData = "";
         res.setEncoding("utf8");
         res.on("data", (chunk: any) => {
@@ -282,7 +284,7 @@ export function activate(context: vscode.ExtensionContext) {
         res.on("end", () => {
           console.log(rawData);
         });
-      });
+      });*/
     }
   );
   let compileFile = vscode.commands.registerCommand(
