@@ -222,7 +222,7 @@ export function activate(context: vscode.ExtensionContext) {
     async () => {
       let platform = process.platform;
 
-      if (platform !== "win32") {
+      if (platform !== "win32") {    // ---> https://developers.de/blogs/indraneel/archive/2017/10/18/kill-a-process-in-windows-by-port-number.aspx might work
 
         let inputPort = await vscode.window.showInputBox({
           placeHolder: "Enter the port you need to close?"
