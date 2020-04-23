@@ -5,7 +5,7 @@
 <a href="https://github.com/Wscats"><img src="https://img.shields.io/badge/Author-Eno Yao-blueviolet" alt="Eno Yao" /></a>
 <a href="https://github.com/Wscats"><img src="https://api.netlify.com/api/v1/badges/b652768b-1673-42cd-98dd-3fd807b2ebca/deploy-status" alt="Status" /></a>
 
-[English](https://github.com/Wscats/compile-hero/blob/master/vscode-extension/README.md)
+[English](https://github.com/Wscats/compile-hero/blob/master/README.md)
 
 -->
 
@@ -30,11 +30,11 @@ Easily work with `less, sass, scss, typescript, jade, pug and jsx` files in Visu
 
 Compile on save `(ctrl+s)` or select `Compile File(s)` on right-click menu item for `less, sass, scss, typescript, jade, pug and jsx` files without using a build task.
 
-<img src="https://BananaAcid.github.io/compile-superhero/vscode-extension/screenshots/1.gif" />
+<img src="https://BananaAcid.github.io/compile-superhero/screenshots/1.gif" />
 
 <br/>
 
-<img src="https://BananaAcid.github.io/compile-superhero/vscode-extension/screenshots/3.gif" />
+<img src="https://BananaAcid.github.io/compile-superhero/screenshots/3.gif" />
 
 - Compile `less, sass, scss, typescript, jade, pug and jsx` on save.
 - Support autoprefixer for `less, scss, scss`.
@@ -56,18 +56,18 @@ Easy to use. When you writing a file, press save `ctrl+s` to generate the compil
 
 Click to open the extension management interface `Configure Extension Settings`, You can change the path of the project compilation directory, or toggle the switch of language.
 
-<img src="https://BananaAcid.github.io/compile-superhero/vscode-extension/screenshots/5.gif" />
+<img src="https://BananaAcid.github.io/compile-superhero/screenshots/5.gif" />
 # Open In Browser
 
 Right click the `html` file in the directory menu, and the `open in browser` option will appear. You can preview the page in the chrome browser only.
 
-<img src="https://BananaAcid.github.io/compile-superhero/vscode-extension/screenshots/2.gif" />
+<img src="https://BananaAcid.github.io/compile-superhero/screenshots/2.gif" />
 
 # Close Port
 
 At some point, you may be using ports for some services. You can use the `close port` command to close. (OSX/Linux, not Windows)
 
-<img src="https://BananaAcid.github.io/compile-superhero/vscode-extension/screenshots/4.gif" />
+<img src="https://BananaAcid.github.io/compile-superhero/screenshots/4.gif" />
 
 # Thanks to Wscats for the original extension
 
