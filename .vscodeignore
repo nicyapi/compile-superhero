@@ -14,3 +14,4 @@ logos/others/**
 README.CN.md
 yarn.lock
 **.vsix
+**/*.psd
