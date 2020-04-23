@@ -270,6 +270,7 @@ export function activate(context: vscode.ExtensionContext) {
       }
     }
   );
+<<<<<<< HEAD
   let makeRequest = vscode.commands.registerCommand(
     "extension.makeRequest",
     async () => {
@@ -285,6 +286,8 @@ export function activate(context: vscode.ExtensionContext) {
       });*/
     }
   );
+=======
+>>>>>>> bugfix/dubious-fn
   let compileFile = vscode.commands.registerCommand(
     "extension.compileFile",
     path => {
@@ -297,7 +300,6 @@ export function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(openInBrowser);
   context.subscriptions.push(closePort);
-  context.subscriptions.push(makeRequest);
   context.subscriptions.push(compileFile);
   vscode.workspace.onDidSaveTextDocument(document => {
     const { fileName } = document;
