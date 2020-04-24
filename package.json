@@ -16,7 +16,7 @@
   ],
   "publisher": "BananaAcid",
   "version": "10.0.3",
-  "preview": true,
+  "preview": false,
   "icon": "logos/hero2.png",
   "homepage": "https://github.com/BananaAcid/compile-superhero",
   "engines": {
