@@ -157,7 +157,6 @@
           "default": true,
           "description": "Enable to compile pug."
         },
-
         "compile-hero.x-show-compileerror-message": {
           "type": "boolean",
           "default": true,
@@ -173,7 +172,6 @@
           "default": ".html",
           "description": "The default file extension for compiled HTML (*.html) files."
         }
-
       }
     },
     "menus": {
@@ -233,7 +231,6 @@
     "open": "^6.4.0",
     "pug": "^2.0.4",
     "typescript": "^3.3.1"
-    
   },
   "devDependencies": {
     "vscode": "^1.1.28",
