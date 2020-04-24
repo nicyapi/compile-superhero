@@ -1,4 +1,5 @@
-const sass = require('./sass.sync.js')
+// @ts-ignore
+import sass from './sass.sync.js';
 const compileSass = (data: string, option: Object) => {
     return new Promise((resolve, reject) => {
         sass.compile(data, {
@@ -13,7 +14,7 @@ const compileSass = (data: string, option: Object) => {
         });
     })
 }
-module.exports = {
+export {
     compileSass,
     sass
 }

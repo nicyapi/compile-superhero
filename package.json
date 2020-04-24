@@ -157,7 +157,6 @@
           "default": true,
           "description": "Enable to compile pug."
         },
-
         "compile-hero.x-show-compileerror-message": {
           "type": "boolean",
           "default": true,
@@ -173,7 +172,6 @@
           "default": ".html",
           "description": "The default file extension for compiled HTML (*.html) files."
         }
-
       }
     },
     "menus": {
@@ -220,8 +218,23 @@
   "dependencies": {
     "@babel/core": "^7.7.0",
     "@babel/preset-env": "^7.7.1",
+    "@types/babel__preset-env": "^7.9.0",
+    "@types/chokidar": "^2.1.3",
+    "@types/gulp": "^4.0.6",
+    "@types/gulp-babel": "^6.1.29",
+    "@types/gulp-jade": "0.0.31",
+    "@types/gulp-less": "0.0.31",
+    "@types/gulp-minify-css": "0.0.32",
+    "@types/gulp-rename": "0.0.33",
+    "@types/gulp-typescript": "^2.13.0",
+    "@types/gulp-uglify": "^3.0.6",
     "@types/mocha": "^2.2.42",
     "@types/node": "^10.12.21",
+    "@types/open": "^6.2.1",
+    "@types/pug": "^2.0.4",
+    "@types/source-map": "^0.5.7",
+    "@types/through2": "^2.0.34",
+    "chokidar": "^3.3.1",
     "gulp": "^4.0.2",
     "gulp-babel": "^8.0.0",
     "gulp-jade": "^1.1.0",
@@ -232,8 +245,8 @@
     "gulp-uglify": "^3.0.2",
     "open": "^6.4.0",
     "pug": "^2.0.4",
+    "source-map": "^0.7.3",
     "typescript": "^3.3.1"
-    
   },
   "devDependencies": {
     "vscode": "^1.1.28",

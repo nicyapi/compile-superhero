@@ -2,21 +2,19 @@ import * as vscode from "vscode";
 import * as fs from "fs";
 import * as p from "path";
 import { exec } from "child_process";
-import { Pipe, Stream } from "stream";
-import { resolve } from "dns";
-const { compileSass, sass } = require("./sass/index");
-const { src, dest } = require("gulp");
-const uglify = require("gulp-uglify");
-const rename = require("gulp-rename");
-const babel = require("gulp-babel");
-const babelEnv = require("@babel/preset-env");
-const less = require("gulp-less");
-const cssmin = require("gulp-minify-css");
-const ts = require("gulp-typescript");
-const jade = require("gulp-jade");
-const pug = require("pug");
-const open = require("open");
-const through = require("through2");
+import { compileSass, sass } from "./sass/index";
+import { src, dest } from "gulp";
+import * as uglify from "gulp-uglify";
+import * as rename from "gulp-rename";
+import * as babel from "gulp-babel";
+import * as babelEnv from "@babel/preset-env";
+import * as less from "gulp-less";
+import * as cssmin from "gulp-minify-css";
+import * as ts from "gulp-typescript";
+import * as jade from "gulp-jade";
+import * as pug from "pug";
+import * as open from "open";
+import * as through from "through2";
 const readFileContext = (path: string): string => {
   return fs.readFileSync(path).toString();
 };
@@ -108,7 +106,7 @@ const readFileName = async (path: string, fileContext: string) => {
 
     case ".sass":
     case ".scss":
-      let done = await compileSass(fileContext, {
+      let done:any = await compileSass(fileContext, {
         indentedSyntax: fileSuffix === ".sass" ? 1 : 0,
         style: sass.style.expanded || sass.style.compressed
       });
@@ -149,7 +147,7 @@ const readFileName = async (path: string, fileContext: string) => {
       src(path)
         .pipe(
           babel({
-            presets: [babelEnv]
+            presets: [babelEnv as string] //HACK
           })
         )
         .on('error', cbError)
@@ -159,7 +157,7 @@ const readFileName = async (path: string, fileContext: string) => {
       src(path)
         .pipe(
           babel({
-            presets: [babelEnv]
+            presets: [babelEnv as string] //HACK
           })
         )
         .on('error', cbError)
