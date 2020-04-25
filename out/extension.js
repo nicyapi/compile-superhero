@@ -95,7 +95,15 @@ const readFileName = (path, fileContext) => __awaiter(void 0, void 0, void 0, fu
         "compileErrorMsg": config.get("x-show-compileerror-message"),
         "generateMinifiedHtml": config.get("x-generate-minified-html"),
         "generateHtmlExt": config.get("x-generate-html-ext"),
+        "compileFilesInMixinFolders": config.get("x-compile-files-in-mixin-folders"),
+        "compileFilesOnSave": config.get("x-compile-files-on-save")
     };
+    if (!options.compileFilesOnSave)
+        return;
+    if (!options.compileFilesInMixinFolders && /[\/\\]mixin(s)*[\/\\]/.test(path)) {
+        console.info('ignoring mixin', path);
+        return;
+    }
     const cbFinished = function () {
         vscode.window.setStatusBarMessage(`Compile-Superhero: successful!`);
     };
@@ -246,6 +254,7 @@ const readFileName = (path, fileContext) => __awaiter(void 0, void 0, void 0, fu
 });
 function activate(context) {
     console.log('Extension "compile-superhero" is ready now!');
+    vscode.window.setStatusBarMessage(`Compile-Superhero: watching ...`);
     let openInBrowser = vscode.commands.registerCommand("extension.openInBrowser", path => {
         let uri = path.fsPath;
         let platform = process.platform;
@@ -282,9 +291,28 @@ function activate(context) {
         const fileContext = readFileContext(uri);
         readFileName(uri, fileContext);
     });
+    let generateLocalDefaultConfig = vscode.commands.registerCommand("extension.generateLocalDefaultConfig", () => __awaiter(this, void 0, void 0, function* () {
+        var _a, _b, _c, _d, _e, _f;
+        if (vscode.workspace.workspaceFolders) {
+            const config = vscode.workspace.getConfiguration('compile-hero');
+            for (let x in config) {
+                let e = config.inspect(x);
+                if (((_a = e) === null || _a === void 0 ? void 0 : _a.defaultValue) === undefined)
+                    continue;
+                try {
+                    yield config.update(x, ((_b = e) === null || _b === void 0 ? void 0 : _b.workspaceValue) !== undefined ? (_c = e) === null || _c === void 0 ? void 0 : _c.workspaceValue : ((_d = e) === null || _d === void 0 ? void 0 : _d.globalValue) !== undefined ? (_e = e) === null || _e === void 0 ? void 0 : _e.globalValue : (_f = e) === null || _f === void 0 ? void 0 : _f.defaultValue, vscode.ConfigurationTarget.Workspace);
+                }
+                catch (e) {
+                    console.error(x, e);
+                }
+            }
+            ;
+        }
+    }));
     context.subscriptions.push(openInBrowser);
     context.subscriptions.push(closePort);
     context.subscriptions.push(compileFile);
+    context.subscriptions.push(generateLocalDefaultConfig);
     vscode.workspace.onDidSaveTextDocument(document => {
         const { fileName } = document;
         const fileContext = readFileContext(fileName);

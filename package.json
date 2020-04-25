@@ -1,6 +1,6 @@
 {
   "name": "compile-superhero",
-  "displayName": "Sass/Less/Typescript/Jade/Pug Compile-SuperHero",
+  "displayName": "Sass/Less/Typescript/Jade/Pug Compile-Superhero",
   "description": "Really easy to compile ts, tsx, scss, less, jade, pug and es6+ on save, without using a build task.",
   "author": {
     "name": "Nabil Redmann",
@@ -15,7 +15,7 @@
     }
   ],
   "publisher": "BananaAcid",
-  "version": "10.0.3",
+  "version": "10.1.0",
   "preview": false,
   "icon": "logos/hero2.png",
   "homepage": "https://github.com/BananaAcid/compile-superhero",
@@ -66,7 +66,8 @@
     "*",
     "onCommand:extension.openInBrowser",
     "onCommand:extension.closePort",
-    "onCommand:extension.compileFile"
+    "onCommand:extension.compileFile",
+    "onCommand:extension.generateLocalDefaultConfig"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -77,11 +78,18 @@
       },
       {
         "command": "extension.closePort",
+        "when": "isMac",
         "title": "Close Port"
       },
       {
+        "category": "Compile-Superhero",
         "command": "extension.compileFile",
         "title": "Compile File(s)"
+      },
+      {
+        "category": "Compile-Superhero",
+        "command": "extension.generateLocalDefaultConfig",
+        "title": "Generate local default config"
       }
     ],
     "configuration": {
@@ -171,6 +179,16 @@
           "type": "string",
           "default": ".html",
           "description": "The default file extension for compiled HTML (*.html) files."
+        },
+        "compile-hero.x-compile-files-in-mixin-folders": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enables the compilation of files on saving the code, even if they have a folder named `/mixin/` or `/mixins/` in their path."
+        },
+        "compile-hero.x-compile-files-on-save": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enables the compilation of files on saving the code. Can be used to enable compilation on a pre-project basis while the rest of the config could be global."
         }
       }
     },
@@ -183,6 +201,9 @@
         },
         {
           "command": "extension.compileFile"
+        },
+        {
+          "command": "extension.generateLocalDefaultConfig"
         }
       ],
       "editor/context": [

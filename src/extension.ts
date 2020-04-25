@@ -4,6 +4,7 @@ import * as p from "path";
 import { exec } from "child_process";
 import { Pipe, Stream } from "stream";
 import { resolve } from "dns";
+import { debug } from "util";
 const { compileSass, sass } = require("./sass/index");
 const { src, dest } = require("gulp");
 const uglify = require("gulp-uglify");
@@ -87,7 +88,11 @@ const readFileName = async (path: string, fileContext: string) => {
     "compileErrorMsg": config.get<boolean>("x-show-compileerror-message"),
     "generateMinifiedHtml": config.get<boolean>("x-generate-minified-html"),
     "generateHtmlExt": config.get<boolean>("x-generate-html-ext"),
+    "compileFilesInMixinFolders": config.get<boolean>("x-compile-files-in-mixin-folders"),
+    "compileFilesOnSave": config.get<boolean>("x-compile-files-on-save")
   }
+  if (!options.compileFilesOnSave) return;
+  if (!options.compileFilesInMixinFolders && /[\/\\]mixin(s)*[\/\\]/.test(path)) { console.info('ignoring mixin', path);  return; }
 
   const cbFinished = function() {
     vscode.window.setStatusBarMessage(`Compile-Superhero: successful!`);
@@ -101,9 +106,10 @@ const readFileName = async (path: string, fileContext: string) => {
     if (this && this._writableState) this._writableState.finalCalled = true; // cancel further piping.
   };
   
-
   let outputPath = p.resolve(path, "../", outputDirectoryPath[fileSuffix]);
+
   vscode.window.setStatusBarMessage(`Compiling ...`);
+
   switch (fileSuffix) {
 
     case ".sass":
@@ -269,6 +275,7 @@ const readFileName = async (path: string, fileContext: string) => {
 };
 export function activate(context: vscode.ExtensionContext) {
   console.log('Extension "compile-superhero" is ready now!');
+  vscode.window.setStatusBarMessage(`Compile-Superhero: watching ...`);
   let openInBrowser = vscode.commands.registerCommand(
     "extension.openInBrowser",
     path => {
@@ -316,10 +323,34 @@ export function activate(context: vscode.ExtensionContext) {
       readFileName(uri, fileContext);
     }
   );
+  let generateLocalDefaultConfig = vscode.commands.registerCommand(
+    "extension.generateLocalDefaultConfig",
+    async () => {
+      if (vscode.workspace.workspaceFolders) {
+        const config = vscode.workspace.getConfiguration('compile-hero');
+
+        for (let x in config) {
+          let e = config.inspect(x);
+          if (e?.defaultValue === undefined) continue;
+          
+          try {
+            await config.update(x, e?.workspaceValue !== undefined ? e?.workspaceValue : e?.globalValue !== undefined ? e?.globalValue : e?.defaultValue, vscode.ConfigurationTarget.Workspace);
+          }
+          catch(e) {
+            console.error(x, e);
+          }
+
+        };
+      }
+
+    }
+
+  );
 
   context.subscriptions.push(openInBrowser);
   context.subscriptions.push(closePort);
   context.subscriptions.push(compileFile);
+  context.subscriptions.push(generateLocalDefaultConfig);
   vscode.workspace.onDidSaveTextDocument(document => {
     const { fileName } = document;
     const fileContext: string = readFileContext(fileName);
