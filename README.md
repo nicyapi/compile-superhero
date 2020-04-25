@@ -48,7 +48,7 @@ Click to open the extension management interface (`Configure Extension Settings`
 
 - Project-wide settings are configured using the standard `settings.json` file (i.e. Workspace Settings).
 
-# Generate compile-superhero local default config
+# Generate local default config at project
 
 You might want to locally modify the settings of this extension for easy modification/distribution with the project.
 
@@ -56,7 +56,8 @@ You can use the `Generate compile-superhero local default config` command to gen
 it will create a `.vscode/settings.json` or add missing entries, to your project folder.
 
 
-<img src="https://BananaAcid.github.io/compile-superhero/screenshots/5.gif" />
+<!-- img src="https://BananaAcid.github.io/compile-superhero/screenshots/5.gif" / -->
+
 # Open In Browser
 
 Right click the `html` file in the directory menu, and the `open in browser` option will appear. You can preview the page using a fullfile path (security restrictions - not all might work) in the chrome browser only.
