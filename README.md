@@ -46,6 +46,16 @@ Easy to use. When you writing a file, press save (<kbd>ctrl</kbd> + <kbd>s</kbd>
 
 Click to open the extension management interface (`Configure Extension Settings`), You can change the path of the project compilation directory, or enable/disable the compilation of any supported file format.
 
+- Project-wide settings are configured using the standard `settings.json` file (i.e. Workspace Settings).
+
+# Generate compile-superhero local default config
+
+You might want to locally modify the settings of this extension for easy modification/distribution with the project.
+
+You can use the `Generate compile-superhero local default config` command to generate it:
+it will create a `.vscode/settings.json` or add missing entries, to your project folder.
+
+
 <img src="https://BananaAcid.github.io/compile-superhero/screenshots/5.gif" />
 # Open In Browser
 
@@ -60,13 +70,6 @@ Right click the `html` file in the directory menu, and the `open in browser` opt
 At some point, you may be using ports for some services. If they are blocked, you can use the `close port` command to close them. (OSX/Linux, not Windows)
 
 <img src="https://BananaAcid.github.io/compile-superhero/screenshots/4.gif" />
-
-# Generate compile-superhero local default config
-
-You might want to locally modify the settings of this extension for easy modification/distribution with the project.
-
-You can use the `Generate compile-superhero local default config` command to generate it:
-it will create a .vscode/settings.json or add missing entries, to your project folder.
 
 
 # Thanks to Wscats for the original extension
