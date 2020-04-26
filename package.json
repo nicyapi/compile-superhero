@@ -67,7 +67,11 @@
     "onCommand:extension.openInBrowser",
     "onCommand:extension.closePort",
     "onCommand:extension.compileFile",
-    "onCommand:extension.generateLocalDefaultConfig"
+    "onCommand:extension.generateLocalDefaultConfig",
+
+    "onCommand:configScreen.start",
+    "onCommand:configScreen.doRefactor",
+    "onWebviewPanel:configScreen"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -90,6 +94,17 @@
         "category": "Compile-Superhero",
         "command": "extension.generateLocalDefaultConfig",
         "title": "Generate local default config"
+      },
+
+      {
+        "category": "Compile-Superhero",
+        "command": "configScreen.start",
+        "title": "Cat Coding - Start cat coding session"
+      },
+      {
+        "category": "Compile-Superhero",
+        "command": "configScreen.doRefactor",
+        "title": "Cat Coding - Do some refactoring"
       }
     ],
     "configuration": {

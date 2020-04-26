@@ -18,6 +18,9 @@ const jade = require("gulp-jade");
 const pug = require("pug");
 const open = require("open");
 const through = require("through2");
+
+import * as configscreen from "./lib/configscreen";
+
 const readFileContext = (path: string): string => {
   return fs.readFileSync(path).toString();
 };
@@ -274,6 +277,8 @@ const readFileName = async (path: string, fileContext: string) => {
   }
 };
 export function activate(context: vscode.ExtensionContext) {
+  configscreen.activate(context);
+  
   console.log('Extension "compile-superhero" is ready now!');
   vscode.window.setStatusBarMessage(`Compile-Superhero: watching ...`);
   let openInBrowser = vscode.commands.registerCommand(

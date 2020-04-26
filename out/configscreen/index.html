@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <!--
+                Use a content security policy to only allow loading images from https or from our extension directory,
+                and only allow scripts that have a specific nonce.
+                -->
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'none'; img-src ${webview_cspSource} https:; script-src 'nonce-${nonce}';">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cat Coding</title>
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300&display=swap" nonce="${nonce}" />
+    <style>
+/* @import url("https://fonts.googleapis.com/css2?family=Roboto:wght@100;300&display=swap");*/
+body {
+  background: #1f2227;
+  color: #cfd0d1;
+  font-family: "Roboto", sans-serif;
+  padding: 2em;
+}
+
+:disabled {
+  color: #39464e;
+}
+
+.settingspane .block {
+  display: grid;
+  grid-template-columns: 50px 1fr;
+  grid-template-rows: 50px 1fr;
+  grid-column-gap: 0.5em;
+  grid-template-areas: "check mainheader" ".     content";
+  border: 1px solid #333;
+  padding: 1em 0.5em;
+}
+.settingspane .block + .block {
+  border-top: none;
+}
+.settingspane .block .enable {
+  grid-area: check;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  justify-items: center;
+  position: relative;
+}
+.settingspane .block .mainheader {
+  grid-area: mainheader;
+  font-weight: 100;
+  font-size: 3em;
+  line-height: 1;
+}
+.settingspane .block .content {
+  grid-area: content;
+  display: block;
+  padding: 1em 0;
+  line-height: 1.4;
+}
+.settingspane .block .content .optionstable {
+  display: block;
+  padding: 1em;
+}
+.settingspane .block .content .optionstable .set {
+  /* 1 row */
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr;
+  /* 2 rows */
+}
+@media (max-width: 500px) {
+  .settingspane .block .content .optionstable .set {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 1fr;
+  }
+}
+.settingspane .block .content .optionstable .set + .set {
+  border-top: 1px solid silver;
+  margin-top: 1em;
+  padding-top: 1em;
+}
+
+input {
+  background: #333;
+  border: 1px solid #39464e;
+  border-radius: 4px;
+  color: inherit;
+  padding: 0.25em 0.5em;
+  font-family: inherit;
+}
+input:hover {
+  background: #666;
+}
+
+input[type=checkbox] + .checkmark {
+  border-radius: 4px;
+}
+
+/* https://www.w3schools.com/howto/howto_css_custom_checkbox.asp */
+/* Customize the label (the container) */
+label.enable {
+  display: block;
+  position: relative;
+  cursor: pointer;
+  font-size: 22px;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  /* Hide the browser's default checkbox */
+  /* Create a custom checkbox */
+  /* On mouse-over, add a grey background color */
+  /* When the checkbox is checked, add a blue background */
+  /* Create the checkmark/indicator (hidden when not checked) */
+  /* Show the checkmark when checked */
+  /* Style the checkmark/indicator */
+}
+label.enable input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+label.enable .checkmark {
+  position: relative;
+  top: 0;
+  left: 0;
+  height: 60%;
+  width: 60%;
+  background-color: #333;
+}
+label.enable:hover input ~ .checkmark {
+  background-color: #666;
+}
+label.enable input:checked ~ .checkmark {
+  background-color: #2196F3;
+}
+label.enable .checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+}
+label.enable input:checked ~ .checkmark:after {
+  display: block;
+}
+label.enable .checkmark:after {
+  left: 50%;
+  top: 50%;
+  width: 20%;
+  height: 40%;
+  border: solid white;
+  border-width: 0 3px 3px 0;
+  -webkit-transform: rotate(45deg) translate(-100%, -20%);
+  -ms-transform: rotate(45deg) translate(-100%, -20%);
+  transform: rotate(45deg) translate(-100%, -20%);
+}
+    </style>
+
+    <script>
+        let settings = ${settings};
+    </script>
+</head>
+
+<body>
+    <img src="${catGifPath}" width="300" />
+    <h1 id="lines-of-code-counter">0</h1>
+
+    <h2>hellooo</h2>
+
+<div class='settingspane'>
+    <div class='block'>
+        <label class='enable'>
+            <input type='checkbox'>
+            <div class='checkmark'></div>
+        </label>
+        <header class='mainheader'>Settings A</header>
+        <div class='content'>
+            <div class='description'>This does something very nice</div>
+            <div class='optionstable'>
+                <div class='set'>
+                    <header>compile to</header>
+                    <input value='./dist'>
+                </div>
+                <div class='set'>
+                    <header>special ext</header>
+                    <input value='.html'>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class='block'>
+        <label class='enable'>
+            <input checked type='checkbox'>
+            <div class='checkmark'></div>
+        </label>
+        <header class='mainheader'>Settings B</header>
+        <div class='content'>
+            <div class='description'>This does something very nice</div>
+            <div class='optionstable'>
+                <div class='set'>
+                    <header>compile to</header>
+                    <input value='./dist/assets'>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+    <script nonce="${nonce}" src="${scriptUri}"></script>
+</body>
+
+</html>
