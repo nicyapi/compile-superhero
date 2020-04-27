@@ -1,0 +1,143 @@
+doctype html
+html(lang="en")
+    head
+        meta(charset="UTF-8")
+        meta(name="viewport", content="width=device-width, initial-scale=1.0")
+        title Compile-Superhero Settings
+
+        meta(http-equiv="Content-Security-Policy" content="default-src 'none'; img-src "+webview.cspSource+" https: 'self' 'nonce-"+nonce+"'; script-src 'nonce-"+nonce+"'; style-src 'nonce-"+nonce+"' 'self'; font-src "+webview.cspSource+" https:")
+
+        style(nonce=nonce)!= lessMain.css
+
+    body
+
+        .settingspane
+
+            button(class="usersettings", title="Open VSCode User Settings For This Extension") User Settings
+
+            header.globalheader
+                img(src="https://bananaacid.github.io/compile-superhero/logos/hero2.png")
+
+                //-
+                    BROKEN SOMEHOW !?
+                    <img src="#{heroUri}" />
+                    img(src!=heroUri)
+
+                nobr Compile-Superhero:
+                | 
+                nobr workspace settings
+
+            .block
+                - let gEnable = settings['']['x']['compile-hero.x-compile-files-on-save'];
+                - let gEnableGlobValue = gEnable.values.globalValue!==undefined ? gEnable.values.globalValue : gEnable.values.defaultValue;
+                - let gEnableAttr = {name: gEnable.key};
+                //- is on - by a global or default
+                - if (gEnableGlobValue) gEnableAttr.class = ['ison', 'isonbak']; else gEnableAttr.class = ['isoff', 'isoffbak'];
+                //- has a workspace value => attribute checked = true/false
+                - gEnableAttr.isset = gEnable.values.workspaceValue!==undefined;
+                - if (gEnableAttr.isset) gEnableAttr.checked = gEnable.values.workspaceValue;
+
+                - if (gEnable.current == true) gEnableAttr.checked = true;
+
+                label.enable
+                    input(type="checkbox")&attributes(gEnableAttr)
+                    .checkmark
+
+                header.mainheader= gEnable.caption
+                
+                .content
+                    .description
+                        .optcaption= gEnable.description
+                        .optsmall
+                            = gEnable.key
+                            | &nbsp;&nbsp;&nbsp; default: &nbsp;
+                            em= gEnable.default
+                            | &nbsp;&nbsp;&nbsp; global: &nbsp;
+                            em= gEnable.values.globalValue !== undefined ? gEnable.values.globalValue : 'not set'
+                            | 
+                            a(data-unset=gEnable.key, title="Remove setting from workspace, inheriting from global again") unset
+
+                    //- xmp!= JSON.stringify(gEnableAttr) + '\n' +  JSON.stringify({'data-g': gEnableGlobValue, 'data-gv': gEnable.values.globalValue === undefined ? 'undef' : gEnable.values.globalValue, 'data-dv': gEnable.values.defaultValue})
+
+
+
+        each category, catKey in settings
+            if catKey !== ''
+
+                .settingspane
+
+                    each optGroup, key in category
+                        .block
+                            //- console.log('.....', 'compile-hero.' + key + '-output-toggle', optGroup['compile-hero.' + key + '-output-toggle'])
+                            - let toggle = optGroup['compile-hero.' + key + '-output-toggle'];
+
+                            if (toggle)
+                                - let opt0 = optGroup['compile-hero.' + key + '-output-toggle'];
+                                - let globValue0 = opt0.values.globalValue!==undefined ? opt0.values.globalValue : opt0.values.defaultValue;
+
+                                - attr0 = {name: opt0.key};
+                                //- is on - by a global or default
+                                - if (globValue0) attr0.class = ['ison', 'isonbak']; else attr0.class = ['isoff', 'isoffbak'];
+                                //- has a workspace value => attribute checked = true/false
+                                - attr0.isset = opt0.values.workspaceValue!==undefined;
+                                - if (attr0.isset) attr0.checked = opt0.values.workspaceValue;
+
+
+                                label.enable
+                                    input(type="checkbox")&attributes(attr0)
+                                    .checkmark
+                                
+
+                            header.mainheader
+                                span= key == 'x' ? 'Advanced' : key
+                            
+                            .content
+                                if detailsJson[key]
+                                    .description!= detailsJson[key].join('<br>')
+
+
+                                .optionstable
+                                    each opt, key2 in optGroup
+                                        - let val = opt.values.workspaceValue!==undefined ? opt.values.workspaceValue : opt.values.globalValue!==undefined ? opt.values.globalValue : opt.values.defaultValue;
+                                        - let globValue = opt.values.globalValue!==undefined ? opt.values.globalValue : opt.values.defaultValue;
+
+                                        .set
+                                            header
+                                                .optcaption= opt.caption
+                                                .optdescription= opt.description
+                                                .optsmall
+                                                    = opt.key
+                                                    | &nbsp;&nbsp;&nbsp; default: &nbsp;
+                                                    em= opt.default
+                                                    | &nbsp;&nbsp;&nbsp; global: &nbsp;
+                                                    em= opt.values.globalValue !== undefined ? opt.values.globalValue : 'not set'
+
+                                            
+                                            if opt.type === 'string'
+                                                div
+                                                    input(type="text",value=opt.values.workspaceValue!==undefined ? opt.values.workspaceValue : '', name=opt.key, placeholder=globValue )
+
+                                            if opt.type === 'boolean'
+                                                - attr = {name: opt.key};
+                                                //- is on - by a global or default
+                                                - if (globValue) attr.class = ['ison', 'isonbak']; else attr.class = ['isoff', 'isoffbak'];
+                                                //- has a workspace value => attribute checked = true/false
+                                                - attr.isset = opt.values.workspaceValue!==undefined;
+                                                - if (attr.isset) attr.checked = opt.values.workspaceValue;
+
+                                                //- DEBUG:
+                                                //- xmp!= JSON.stringify(attr) + '\n' +  JSON.stringify({'data-g': globValue, 'data-gv': opt.values.globalValue === undefined ? 'undef' : opt.values.globalValue, 'data-dv': opt.values.defaultValue})
+
+                                                div
+                                                    label.enable
+                                                        input(type="checkbox")&attributes(attr)
+                                                        .checkmark
+                                                    | 
+                                                    a(data-unset=opt.key, title="Remove setting from workspace, inheriting from global again") unset
+
+        script(nonce!=nonce, src!=scriptUri)
+
+        //- DEBUG:
+        //-
+            script(nonce!=nonce).
+                console.log(document.body.innerHTML);

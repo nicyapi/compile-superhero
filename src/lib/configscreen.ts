@@ -1,7 +1,36 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
+import * as pug from 'pug';
+import * as less from 'less';
 import * as fsO from 'fs';
 const fs = fsO.promises;
+
+// 'package.json'.contributes.configuration.properties
+type cmdIn = {
+    type: string,
+    default: any,
+    description: string,
+    csgroup: string,
+}
+type SettingsItemsIn = { [key: string]: cmdIn }
+
+type cmdOutValues = {
+    key: string,
+    defaultValue?: any,
+    globalValue?: any,
+    workspaceFolderValue?: any,
+    workspaceValue?: any,
+}
+type cmdOut = {
+    key: string,
+    caption: string,
+    type: string,
+    default: any,
+    values?: cmdOutValues, // inspect()
+    current: any,
+    description: string
+};
+type SettingsItems = { [key: string]: { [key: string]: { [key: string]: cmdOut } } };
 
 
 export function activate(context: vscode.ExtensionContext) {
@@ -11,6 +40,7 @@ export function activate(context: vscode.ExtensionContext) {
         })
     );
 
+    /* Example
     context.subscriptions.push(
         vscode.commands.registerCommand('configScreen.doRefactor', () => {
             if (SuperheroConfigPanel.currentPanel) {
@@ -18,6 +48,7 @@ export function activate(context: vscode.ExtensionContext) {
             }
         })
     );
+    */
 
     if (vscode.window.registerWebviewPanelSerializer) {
         // Make sure we register a serializer in activation event
@@ -102,9 +133,25 @@ class SuperheroConfigPanel {
         // Handle messages from the webview
         this._panel.webview.onDidReceiveMessage(
             message => {
-                switch (message.command) {
-                    case 'alert':
-                        vscode.window.showErrorMessage(message.text);
+                switch (message.command) {     
+                    case 'usersettings':
+                        vscode.commands.executeCommand('workbench.action.openSettings', '@ext:bananaacid.compile-superhero');
+
+                        return;
+                    case 'unset':
+                        //DEBUG: vscode.window.showInformationMessage('unset: ' + message.key);
+
+                        vscode.workspace.getConfiguration('compile-hero')
+                            .update(message.key.replace('compile-hero.', ''), undefined, vscode.ConfigurationTarget.Workspace);
+
+                        return;
+                    
+                    case 'change':
+                        //DEBUG: vscode.window.showInformationMessage('change: ' + message.key + ' -> ' + JSON.stringify(message.value));
+
+                        vscode.workspace.getConfiguration('compile-hero')
+                            .update(message.key.replace('compile-hero.', ''), message.value, vscode.ConfigurationTarget.Workspace);
+
                         return;
                 }
             },
@@ -113,11 +160,13 @@ class SuperheroConfigPanel {
         );
     }
 
+    /* Example
     public doRefactor() {
         // Send a message to the webview webview.
         // You can send any JSON serializable data.
         this._panel.webview.postMessage({ command: 'refactor' });
     }
+    */
 
     public dispose() {
         SuperheroConfigPanel.currentPanel = undefined;
@@ -136,7 +185,7 @@ class SuperheroConfigPanel {
     private async _update() {
         const webview = this._panel.webview;
         
-        //this._panel.title = catName;
+        //this._panel.title = "new title";
         this._panel.webview.html = await this._getHtmlForWebview(webview);
     }
 
@@ -144,33 +193,79 @@ class SuperheroConfigPanel {
         // Use a nonce to whitelist which scripts can be run
         const nonce = this.getNonce();
 
+        
         // Local path to main script run in the webview
         const extPathScript = vscode.Uri.file(
             path.join(this._extensionPath, 'out/configscreen', 'index.js')
         );
         // And the uri we use to load this script in the webview
-        const scriptUri = webview.asWebviewUri(extPathScript);
+        const scriptUri = webview.asWebviewUri(extPathScript).toString();
+        
 
         // the markup of our view
         const extPathViewMain = vscode.Uri.file(
-            path.join(this._extensionPath, 'out/configscreen', 'index.html')
-        );    
-        let html = await fs.readFile(extPathViewMain.fsPath, { encoding: 'utf8' });
+            path.join(this._extensionPath, 'out/configscreen', 'index.pug')
+        ); 
+        // the css for our view
+        const extPathLessMain = vscode.Uri.file(
+            path.join(this._extensionPath, 'out/configscreen', 'index.less')
+        );
+        const lessMain = await less.render(await fs.readFile(extPathLessMain.fsPath, { encoding: 'utf8' }), {
+            filename: extPathLessMain.fsPath
+        }).catch(err => console.log(err));
+        
 
+        const extPathHeroLogo = vscode.Uri.file(
+            path.join(this._extensionPath, 'logos', 'hero2.png')
+        );
+        const heroUri = webview.asWebviewUri(extPathHeroLogo).toString();
 
         const extPathPackageJson = vscode.Uri.file(
             path.join(this._extensionPath, './', 'package.json')
         );
         let json = await import(extPathPackageJson.fsPath);
-        let settings = json.contributes.configuration.properties;
+        let settingsObject: SettingsItemsIn = json.contributes.configuration.properties;
+
+        const extPathDetailsJson = vscode.Uri.file(
+            path.join(this._extensionPath, './out/configscreen', 'details.json')
+        );
+        let detailsJson = await import(extPathDetailsJson.fsPath);
 
 
-        html = this.parseStringTemplate(html, {
-            webview_cspSource: webview.cspSource,
-            nonce,
-            scriptUri,
-            settings: JSON.stringify(settings)
-        });
+        let config = vscode.workspace.getConfiguration('compile-hero');
+
+        let settings: SettingsItems = {};
+        for (let i in settingsObject) {
+            if (i === undefined) continue;
+//console.info('i', i);
+            let [_, second] = i.split('.');
+            let [first, ...rest] = second.split('-');
+            let category = settingsObject[i].csgroup; // first !== 'x' ? 'default' : 'advanced';   // filter specifics
+            if (!settings[category]) settings[category] = {};
+            if (!settings[category][first]) settings[category][first] = {};
+
+            settings[category][first][i] = {
+                key: i,
+                caption: rest.join(' ').replace(/\b[a-z]/g, match => match.toUpperCase()),
+                current: config.get(second),
+                values: config.inspect(second),
+                ...settingsObject[i]
+            };
+        }
+
+        let html = await new Promise<string>((resolve, reject) => {
+            pug.renderFile(extPathViewMain.fsPath, {
+                webview,
+                nonce,
+                scriptUri,
+                settings,
+                lessMain,
+                detailsJson,
+                heroUri
+            }, (err: any, data: string) => { 
+                if (err) { vscode.window.activeTerminal?.sendText(err.message); vscode.window.showErrorMessage(err.message); reject(err); } else resolve(data); 
+            })
+        })
 
         return html;
     }
@@ -182,15 +277,5 @@ class SuperheroConfigPanel {
             text += possible.charAt(Math.floor(Math.random() * possible.length));
         }
         return text;
-    }
-
-    // https://stackoverflow.com/a/59084440/1644202
-    // only SHALLOW obj may be provided
-    private parseStringTemplate(str: string, obj: any) {
-        let parts: string[] = str.split(/\$\{(?!\d)[\wæøåÆØÅ]*\}/);
-        let args = str.match(/[^{\}]+(?=})/g) || [];
-        let parameters = args.map(argument => obj[argument] || (obj[argument] === undefined ? "" : obj[argument]));
-        let a0:any = { raw: parts };
-        return String.raw(a0, ...parameters);
     }
 }

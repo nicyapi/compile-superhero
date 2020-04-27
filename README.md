@@ -44,15 +44,20 @@ Easy to use. When you writing a file, press save (<kbd>ctrl</kbd> + <kbd>s</kbd>
 
 # Configuration
 
+## Compile-Hero settings view
+
+You may want to use the command `Open settings` to open the settings on an easy to configure pane.
+
+## VSCode settings overview
 Click to open the extension management interface (`Configure Extension Settings`), You can change the path of the project compilation directory, or enable/disable the compilation of any supported file format.
 
 - Project-wide settings are configured using the standard `settings.json` file (i.e. Workspace Settings).
 
-# Generate local default config at project
+## Generate local default settings at project
 
 You might want to locally modify the settings of this extension for easy modification/distribution with the project.
 
-You can use the `Generate compile-superhero local default config` command to generate it:
+You can use the `Generate Compile-Superhero's default settings locally` command to generate it:
 it will create a `.vscode/settings.json` or add missing entries, to your project folder.
 
 

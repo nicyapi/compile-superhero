@@ -88,7 +88,7 @@ const readFileName = async (path: string, fileContext: string) => {
   if (!compileStatus[fileSuffix]) return;
 
   let options: any = {
-    "compileErrorMsg": config.get<boolean>("x-show-compileerror-message"),
+    "compileErrorMsg": config.get<boolean>("x-show-compile-error-messages"),
     "generateMinifiedHtml": config.get<boolean>("x-generate-minified-html"),
     "generateHtmlExt": config.get<boolean>("x-generate-html-ext"),
     "compileFilesInMixinFolders": config.get<boolean>("x-compile-files-in-mixin-folders"),
@@ -278,7 +278,7 @@ const readFileName = async (path: string, fileContext: string) => {
 };
 export function activate(context: vscode.ExtensionContext) {
   configscreen.activate(context);
-  
+
   console.log('Extension "compile-superhero" is ready now!');
   vscode.window.setStatusBarMessage(`Compile-Superhero: watching ...`);
   let openInBrowser = vscode.commands.registerCommand(

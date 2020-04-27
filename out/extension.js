@@ -93,7 +93,7 @@ const readFileName = (path, fileContext) => __awaiter(void 0, void 0, void 0, fu
     if (!compileStatus[fileSuffix])
         return;
     let options = {
-        "compileErrorMsg": config.get("x-show-compileerror-message"),
+        "compileErrorMsg": config.get("x-show-compile-error-messages"),
         "generateMinifiedHtml": config.get("x-generate-minified-html"),
         "generateHtmlExt": config.get("x-generate-html-ext"),
         "compileFilesInMixinFolders": config.get("x-compile-files-in-mixin-folders"),

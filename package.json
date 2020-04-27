@@ -15,7 +15,7 @@
     }
   ],
   "publisher": "BananaAcid",
-  "version": "10.1.0",
+  "version": "10.1.1",
   "preview": false,
   "icon": "logos/hero2.png",
   "homepage": "https://github.com/BananaAcid/compile-superhero",
@@ -68,21 +68,21 @@
     "onCommand:extension.closePort",
     "onCommand:extension.compileFile",
     "onCommand:extension.generateLocalDefaultConfig",
-
     "onCommand:configScreen.start",
-    "onCommand:configScreen.doRefactor",
     "onWebviewPanel:configScreen"
   ],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
       {
+        "category": "Compile-Superhero",
         "command": "extension.openInBrowser",
         "title": "Open In Browser"
       },
       {
-        "command": "extension.closePort",
+        "category": "Compile-Superhero",
         "when": "isMac",
+        "command": "extension.closePort",
         "title": "Close Port"
       },
       {
@@ -93,18 +93,12 @@
       {
         "category": "Compile-Superhero",
         "command": "extension.generateLocalDefaultConfig",
-        "title": "Generate local default config"
+        "title": "Generate Compile-Superhero's Default Settings Locally"
       },
-
       {
         "category": "Compile-Superhero",
         "command": "configScreen.start",
-        "title": "Cat Coding - Start cat coding session"
-      },
-      {
-        "category": "Compile-Superhero",
-        "command": "configScreen.doRefactor",
-        "title": "Cat Coding - Do some refactoring"
+        "title": "Open Settings"
       }
     ],
     "configuration": {
@@ -113,97 +107,116 @@
         "compile-hero.javascript-output-directory": {
           "type": "string",
           "default": "./dist",
-          "description": "The output directory for compiled javascript."
+          "description": "The output directory for compiled javascript.",
+          "csgroup": "js"
         },
         "compile-hero.sass-output-directory": {
           "type": "string",
           "default": "./dist",
-          "description": "The output directory for compiled scss and sass."
+          "description": "The output directory for compiled sass and scss.",
+          "csgroup": "css"
         },
         "compile-hero.less-output-directory": {
           "type": "string",
           "default": "./dist",
-          "description": "The output directory for compiled less."
+          "description": "The output directory for compiled less.",
+          "csgroup": "css"
         },
         "compile-hero.jade-output-directory": {
           "type": "string",
           "default": "./dist",
-          "description": "The output directory for compiled jade."
+          "description": "The output directory for compiled jade.",
+          "csgroup": "html"
         },
         "compile-hero.typescript-output-directory": {
           "type": "string",
           "default": "./dist",
-          "description": "The output directory for compiled typescript."
+          "description": "The output directory for compiled typescript.",
+          "csgroup": "js"
         },
         "compile-hero.typescriptx-output-directory": {
           "type": "string",
           "default": "./dist",
-          "description": "The output directory for compiled typescriptx."
+          "description": "The output directory for compiled typescriptx.",
+          "csgroup": "js"
         },
         "compile-hero.pug-output-directory": {
           "type": "string",
           "default": "./dist",
-          "description": "The output directory for compiled pug."
+          "description": "The output directory for compiled pug.",
+          "csgroup": "html"
         },
         "compile-hero.javascript-output-toggle": {
           "type": "boolean",
           "default": true,
-          "description": "Enable to compile javascript."
+          "description": "Enable to compile javascript.",
+          "csgroup": "js"
         },
         "compile-hero.sass-output-toggle": {
           "type": "boolean",
           "default": true,
-          "description": "Enable to compile scss and sass."
+          "description": "Enable to compile scss and sass.",
+          "csgroup": "css"
         },
         "compile-hero.less-output-toggle": {
           "type": "boolean",
           "default": true,
-          "description": "Enable to compile less."
+          "description": "Enable to compile less.",
+          "csgroup": "css"
         },
         "compile-hero.jade-output-toggle": {
           "type": "boolean",
           "default": true,
-          "description": "Enable to compile jade."
+          "description": "Enable to compile jade.",
+          "csgroup": "html"
         },
         "compile-hero.typescript-output-toggle": {
           "type": "boolean",
           "default": true,
-          "description": "Enable to compile typescript."
+          "description": "Enable to compile typescript.",
+          "csgroup": "js"
         },
         "compile-hero.typescriptx-output-toggle": {
           "type": "boolean",
           "default": true,
-          "description": "Enable to compile typescriptx."
+          "description": "Enable to compile typescriptx.",
+          "csgroup": "js"
         },
         "compile-hero.pug-output-toggle": {
           "type": "boolean",
           "default": true,
-          "description": "Enable to compile pug."
+          "description": "Enable to compile pug.",
+          "csgroup": "html"
         },
-        "compile-hero.x-show-compileerror-message": {
+        "compile-hero.x-show-compile-error-messages": {
           "type": "boolean",
           "default": true,
-          "description": "Enable to show compile error messages in VSCode."
+          "description": "Enable to show compile error messages in VSCode.",
+          "csgroup": "adv"
         },
         "compile-hero.x-generate-minified-html": {
           "type": "boolean",
           "default": false,
-          "description": "Enable to also generate minified HTML (*.min.html) files."
+          "description": "Enable to also generate minified HTML (*.min.html) files.",
+          "csgroup": "html"
         },
         "compile-hero.x-generate-html-ext": {
           "type": "string",
           "default": ".html",
-          "description": "The default file extension for compiled HTML (*.html) files."
+          "description": "The default file extension for compiled HTML (*.html) files.",
+          "csgroup": "html"
         },
         "compile-hero.x-compile-files-in-mixin-folders": {
           "type": "boolean",
           "default": false,
-          "description": "Enables the compilation of files on saving the code, even if they have a folder named `/mixin/` or `/mixins/` in their path."
+          "description": "Enables the compilation of files on saving the code, even if they have a folder named `/mixin/` or `/mixins/` in their path.",
+          "csgroup": "adv"
         },
         "compile-hero.x-compile-files-on-save": {
           "type": "boolean",
           "default": true,
-          "description": "Enables the compilation of files on saving the code. Can be used to enable compilation on a pre-project basis while the rest of the config could be global."
+          "description": "Enables the compilation of files on saving the code. Can be used to enable compilation on a pre-project basis while the rest of the config could be global.",
+          "csgroup": ""
         }
       }
     },
@@ -254,8 +267,10 @@
   "dependencies": {
     "@babel/core": "^7.7.0",
     "@babel/preset-env": "^7.7.1",
+    "@types/less": "^3.0.1",
     "@types/mocha": "^2.2.42",
     "@types/node": "^10.12.21",
+    "@types/pug": "^2.0.4",
     "gulp": "^4.0.2",
     "gulp-babel": "^8.0.0",
     "gulp-jade": "^1.1.0",

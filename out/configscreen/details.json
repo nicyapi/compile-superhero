@@ -1,0 +1,37 @@
+{
+    "javascript": [
+        "<img class=\"desclogo\" src=\"https://d33wubrfki0l68.cloudfront.net/7a197cfe44548cc1a3f581152af70a3051e11671/78df8/img/babel.svg\" />",
+        "Compiling ES6 to globaly supported JavaScript and optimizing it.",
+        "See <a href=\"https://babeljs.io/\" target=\"_blank\">BabelJS homepage</a> for an in depth explanation."
+    ],
+    "typescript": [
+        "<img class=\"desclogo\" src=\"https://github.com/remojansen/logo.ts/raw/master/ts.png\" />",
+        "Compiling JS written in safer JS with more advanced syntax to globally supported JavaScript.",
+        "See <a href=\"http://typescriptlang.org/\" target=\"_blank\">TypeScript homepage</a> for an in depth explanation."
+    ],
+    "typescriptx": [
+        "<img class=\"desclogo\" src=\"https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg\" />",
+        "Compiling JS wiht React written in safer JS with more advanced syntax to globally supported JavaScript.",
+        "See <a href=\"https://www.typescriptlang.org/docs/handbook/jsx.html\" target=\"_blank\">TypeScript (JSX) homepage</a> for an in depth explanation."
+    ],
+    "sass": [
+        "<img class=\"desclogo\" src=\"https://camo.githubusercontent.com/d99f56a301db0c5ac49f2a9d735e883c3854cf5d/68747470733a2f2f7261776769742e636f6d2f736173732f736173732d736974652f6d61737465722f736f757263652f6173736574732f696d672f6c6f676f732f6c6f676f2e737667\" />",
+        "Compiling CSS written in SASS or SCSS style to globally supported CSS.",
+        "See <a href=\"https://sass-lang.com/\" target=\"_blank\">SASS homepage</a> for an in depth explanation."
+    ],
+    "less": [
+        "<img class=\"desclogo\" src=\"https://camo.githubusercontent.com/9f9d89e162b8088c0065537b15f0f759cfbc6197/687474703a2f2f6c6573736373732e6f72672f7075626c69632f696d672f6c6573735f6c6f676f2e706e67\" />",
+        "Compiling CSS written in LESS style to globally supported CSS.",
+        "See <a href=\"http://lesscss.org/\" target=\"_blank\">LESS homepage</a> for an in depth explanation."
+    ],
+    "jade": [
+        "Compiling HTML written in JADE (old version of PUG) to globally supported HTML.",
+        "See <a href=\"http://jade-lang.com/\" target=\"_blank\">JADE homepage</a> for an in depth explanation."
+    ],
+    "pug": [
+        "<img class=\"desclogo\" src=\"https://camo.githubusercontent.com/a43de8ca816e78b1c2666f7696f449b2eeddbeca/68747470733a2f2f63646e2e7261776769742e636f6d2f7075676a732f7075672d6c6f676f2f656563343336636565386664396431373236643738333963626539396431663639343639326330632f5356472f7075672d66696e616c2d6c6f676f2d5f2d636f6c6f75722d3132382e737667\" />",
+        "Compiling HTML written in PUG (new version of JADE) to globally supported HTML.",
+        "See <a href=\"http://pugjs.org/\" target=\"_blank\">PUG homepage</a> for an in depth explanation."
+    ]
+
+}

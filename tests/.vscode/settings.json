@@ -7,11 +7,15 @@
     "compile-hero.typescriptx-output-directory": "./results/",
     "compile-hero.javascript-output-directory": "./results/",
     "compile-hero.jade-output-toggle": true,
-    "compile-hero.javascript-output-toggle": true,
     "compile-hero.less-output-toggle": true,
-    "compile-hero.pug-output-toggle": true,
-    "compile-hero.sass-output-toggle": true,
     "compile-hero.typescript-output-toggle": true,
     "compile-hero.typescriptx-output-toggle": true,
-    "compile-hero.x-generate-minified-html": true
+    "compile-hero.javascript-output-toggle": true,
+    "compile-hero.sass-output-toggle": true,
+    "compile-hero.pug-output-toggle": true,
+    "compile-hero.x-show-compile-error-messages": true,
+    "compile-hero.x-generate-minified-html": false,
+    "compile-hero.x-generate-html-ext": ".html",
+    "compile-hero.x-compile-files-in-mixin-folders": false,
+    "compile-hero.x-compile-files-on-save": true
 }
