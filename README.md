@@ -48,6 +48,8 @@ Easy to use. When you writing a file, press save (<kbd>ctrl</kbd> + <kbd>s</kbd>
 
 You may want to use the command `Open settings` to open the settings on an easy to configure pane.
 
+<img src="https://BananaAcid.github.io/compile-superhero/screenshots/settings_small.png" />
+
 ## VSCode settings overview
 Click to open the extension management interface (`Configure Extension Settings`), You can change the path of the project compilation directory, or enable/disable the compilation of any supported file format.
 

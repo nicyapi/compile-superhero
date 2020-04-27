@@ -69,6 +69,10 @@ body {
                          
     border: 1px solid #333;
     padding: 1em .5em;
+
+    > * {
+      vertical-align: middle;
+    }
     
     & + .block {
       border-top: none;
@@ -81,6 +85,7 @@ body {
       align-items: center;
       justify-items: center;
       position: relative;
+      top: -.25em;
     }
     
     .mainheader {
@@ -101,16 +106,34 @@ body {
         padding: 1em;
         
         .set {
-          /* 1 row */
+          /* 1 row, 2 cols */
           display: grid;
           grid-template-columns: 1fr .75fr;
           grid-template-rows: 1fr;
+          grid-column-gap: 2em;
+          grid-row-gap: 1em;
           
-          /* 2 rows */
+          .checkboxarea {
+            padding: .5em 0;
+            
+            > * {
+              vertical-align: middle;
+
+              & + * {
+                margin-left: 2em;
+              }
+            }
+          }
+
+          /* n rows, 1 col */
           @media (max-width: 500px) {
             display: grid;
             grid-template-columns: 1fr;
-            grid-template-rows: 1fr 1fr;
+            grid-template-rows: auto;
+
+            > * {
+              height: auto;
+            }
           }
         }
         
