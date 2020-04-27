@@ -105,6 +105,9 @@ html(lang="en")
                                             header
                                                 .optcaption= opt.caption
                                                 .optdescription= opt.description
+                                                if detailsJson[opt.key]
+                                                    .optdescription!= detailsJson[opt.key].join('<br>')
+
                                                 .optsmall
                                                     = opt.key
                                                     | &nbsp;&nbsp;&nbsp; default: &nbsp;
