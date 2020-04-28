@@ -15,7 +15,7 @@
     }
   ],
   "publisher": "BananaAcid",
-  "version": "10.1.1",
+  "version": "10.2.0",
   "preview": false,
   "icon": "logos/hero2.png",
   "homepage": "https://github.com/BananaAcid/compile-superhero",
@@ -104,12 +104,6 @@
     "configuration": {
       "title": "Compile Superhero configuration",
       "properties": {
-        "compile-hero.javascript-output-directory": {
-          "type": "string",
-          "default": "./dist",
-          "description": "The output directory for compiled javascript.",
-          "csgroup": "js"
-        },
         "compile-hero.sass-output-directory": {
           "type": "string",
           "default": "./dist",
@@ -122,11 +116,23 @@
           "description": "The output directory for compiled less.",
           "csgroup": "css"
         },
+        "compile-hero.pug-output-directory": {
+          "type": "string",
+          "default": "./dist",
+          "description": "The output directory for compiled pug.",
+          "csgroup": "html"
+        },
         "compile-hero.jade-output-directory": {
           "type": "string",
           "default": "./dist",
           "description": "The output directory for compiled jade.",
           "csgroup": "html"
+        },
+        "compile-hero.javascript-output-directory": {
+          "type": "string",
+          "default": "./dist",
+          "description": "The output directory for compiled javascript.",
+          "csgroup": "js"
         },
         "compile-hero.typescript-output-directory": {
           "type": "string",
@@ -138,18 +144,6 @@
           "type": "string",
           "default": "./dist",
           "description": "The output directory for compiled typescriptx.",
-          "csgroup": "js"
-        },
-        "compile-hero.pug-output-directory": {
-          "type": "string",
-          "default": "./dist",
-          "description": "The output directory for compiled pug.",
-          "csgroup": "html"
-        },
-        "compile-hero.javascript-output-toggle": {
-          "type": "boolean",
-          "default": true,
-          "description": "Enable to compile javascript.",
           "csgroup": "js"
         },
         "compile-hero.sass-output-toggle": {
@@ -164,11 +158,23 @@
           "description": "Enable to compile less.",
           "csgroup": "css"
         },
+        "compile-hero.pug-output-toggle": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable to compile pug.",
+          "csgroup": "html"
+        },
         "compile-hero.jade-output-toggle": {
           "type": "boolean",
           "default": true,
           "description": "Enable to compile jade.",
           "csgroup": "html"
+        },
+        "compile-hero.javascript-output-toggle": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable to compile javascript.",
+          "csgroup": "js"
         },
         "compile-hero.typescript-output-toggle": {
           "type": "boolean",
@@ -181,12 +187,6 @@
           "default": true,
           "description": "Enable to compile typescriptx.",
           "csgroup": "js"
-        },
-        "compile-hero.pug-output-toggle": {
-          "type": "boolean",
-          "default": true,
-          "description": "Enable to compile pug.",
-          "csgroup": "html"
         },
         "compile-hero.x-show-compile-error-messages": {
           "type": "boolean",
@@ -217,6 +217,30 @@
           "default": true,
           "description": "Enables the compilation of files on saving the code. Can be used to enable compilation on a pre-project basis while the rest of the config could be global.",
           "csgroup": ""
+        },
+        "compile-hero.x-generate-minified-css": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable to also generate minified CSS (*.min.css) files.",
+          "csgroup": "css"
+        },
+        "compile-hero.x-generate-minified-js": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable to also generate minified JS (*.min.js) files.",
+          "csgroup": "js"
+        },
+        "compile-hero.x-generate-sourcemap-css": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable to also generate debugging sourcemaps for CSS (*.css.map) files.",
+          "csgroup": "css"
+        },
+        "compile-hero.x-generate-sourcemap-js": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable to also generate debugging sourcemaps for JavaScript (*.js.map) files.",
+          "csgroup": "js"
         }
       }
     },
@@ -277,6 +301,7 @@
     "gulp-less": "^4.0.1",
     "gulp-minify-css": "^1.2.4",
     "gulp-rename": "^1.4.0",
+    "gulp-sourcemaps": "^2.6.5",
     "gulp-typescript": "^5.0.1",
     "gulp-uglify": "^3.0.2",
     "open": "^6.4.0",

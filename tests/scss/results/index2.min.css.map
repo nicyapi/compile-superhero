@@ -1,0 +1,1 @@
+{"version":3,"sources":["index2.sass"],"names":[],"mappings":"AAAA,KACE,KAAM,KAAK,UAAW,WACtB,MAAO","file":"../../../../../../index2.min.css","sourcesContent":["$font-stack:    Helvetica, sans-serif\r\n$primary-color: #333\r\n\r\nbody\r\n  font: 100% $font-stack\r\n  color: $primary-color"]}

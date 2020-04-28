@@ -1,0 +1,1 @@
+{"version":3,"sources":["error.tsx"],"names":[],"mappings":"AAAA,IAAM,CAAC,GAAU,CAAC,CAAC;AAElB,CAAC,EAAE,CAAA,CAAA","file":"../../../../../../error.js","sourcesContent":["const a:number = 1;\r\n\r\n ({;"]}

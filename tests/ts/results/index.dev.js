@@ -7,3 +7,4 @@ var fn = function fn(a, b) {
 };
 
 var template = React.createElement("div", null, "123");
+//# sourceMappingURL=d:/GitHub/compile-superhero/tests/ts/results/index.dev.js.map

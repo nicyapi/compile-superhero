@@ -1,0 +1,1 @@
+{"version":3,"sources":["index.scss"],"names":[],"mappings":"AAAA,EACE,MAAO,IAGT,OACE,WAAY","file":"../../../../../../index.min.css","sourcesContent":["p {\r\n    color: red;\r\n    span {\r\n        background: red;\r\n    }\r\n}"]}

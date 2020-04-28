@@ -13,9 +13,13 @@
     "compile-hero.sass-output-toggle": true,
     "compile-hero.pug-output-toggle": true,
     "compile-hero.x-show-compile-error-messages": true,
-    "compile-hero.x-generate-minified-html": false,
+    "compile-hero.x-generate-minified-html": true,
     "compile-hero.x-generate-html-ext": ".html",
     "compile-hero.x-compile-files-in-mixin-folders": false,
     "compile-hero.x-compile-files-on-save": true,
-    "compile-hero.typescript-output-toggle": true
+    "compile-hero.typescript-output-toggle": true,
+    "compile-hero.x-generate-minified-css": true,
+    "compile-hero.x-generate-sourcemap-css": true,
+    "compile-hero.x-generate-minified-js": true,
+    "compile-hero.x-generate-sourcemap-js": true
 }

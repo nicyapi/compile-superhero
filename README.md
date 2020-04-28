@@ -2,6 +2,9 @@
 
 Compared to compile-hero:
 
+- Added support for sourcemaps
+- Added support to disable .min.* files
+- Added a configuration screen for local workfolder (see screenshot below)
 - Added a command to generate all superhero settings into a local project folder
 - Fixed SASS was not compiled at all
 - Fixed most files types were compiling fine, but crashed the extension-host on vscode if they contained an error, or did just do nothing or create empty files
@@ -49,6 +52,8 @@ Easy to use. When you writing a file, press save (<kbd>ctrl</kbd> + <kbd>s</kbd>
 You may want to use the command `Open settings` to open the settings on an easy to configure pane.
 
 <img src="https://BananaAcid.github.io/compile-superhero/screenshots/settings_small.png" />
+
+Right now, you could click on the "Features" tab, to list all available settings and commands.
 
 ## VSCode settings overview
 Click to open the extension management interface (`Configure Extension Settings`), You can change the path of the project compilation directory, or enable/disable the compilation of any supported file format.

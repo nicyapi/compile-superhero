@@ -37,6 +37,15 @@
     "compile-hero.x-show-compile-error-messages": [
         "Notifications will popup on the lower right corner",
         "of the VSCode window containing the compilation error."
+    ],
+
+    "compile-hero.x-generate-sourcemap-css": [
+        "Sourcemaps allow the browser to show the original SASS/SCSS/LESS when debugging.",
+        "Helpful when trying to find the definition while inspecting the DOM or finding an error. <a href='https://www.html5rocks.com/en/tutorials/developertools/sourcemaps/' target='_blank'>Explanation</a>"
+    ],
+    "compile-hero.x-generate-sourcemap-js": [
+        "Sourcemaps allow the browser to show the original, unoptimized JavaScript/TypeScript when debugging.",
+        "Helpful while debugging using breakpoints in code or finding an error. <a href='https://www.html5rocks.com/en/tutorials/developertools/sourcemaps/' target='_blank'>Explanation</a>"
     ]
 
 }

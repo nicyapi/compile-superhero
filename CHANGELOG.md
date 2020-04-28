@@ -1,6 +1,9 @@
 # Change Log
-
-- 2020-04-23 New logo
+- 2020-04-28 Added more options (minified, sourcemaps)
+- 2020-04-28 Changed order of options in settings screen
+- 2020-04-26 Added workfolder config screen (`Compile-Superhero: Open Settings`)
+- 2020-04-26 Added more options
+- 2020-04-23 Added a new logo
 - 2020-04-23 Added **more options** (change html ext, no html min, no compile message)
 - 2020-04-23 Fixed in this fork: SASS was not compiled at all
 - 2020-04-23 Fixed in this fork: Most files types were compiling fine, but crashed the extension-host on vscode if they contained an error, or did just do nothing or create empty files

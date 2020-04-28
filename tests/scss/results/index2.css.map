@@ -1,0 +1,1 @@
+{"version":3,"names":[],"mappings":"","sources":["index2.sass"],"sourcesContent":["$font-stack:    Helvetica, sans-serif\r\n$primary-color: #333\r\n\r\nbody\r\n  font: 100% $font-stack\r\n  color: $primary-color"],"file":"../../../../../../index2.css"}

@@ -1,3 +1,8 @@
 p {
+  x-ignore: 1;
+}
+p {
   color: red;
 }
+
+/*# sourceMappingURL=d:/GitHub/compile-superhero/tests/less/results/index.css.map */

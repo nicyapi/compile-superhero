@@ -1,0 +1,1 @@
+{"version":3,"names":[],"mappings":"","sources":["index.scss"],"sourcesContent":["p {\r\n    color: red;\r\n    span {\r\n        background: red;\r\n    }\r\n}"],"file":"../../../../../../index.css"}

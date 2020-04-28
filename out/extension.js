@@ -9,12 +9,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+/*
+ Known BUG:
+  - tsx recovers after an error: done with errors. It should not output on error.
+*/
 const vscode = require("vscode");
 const fs = require("fs");
 const p = require("path");
 const child_process_1 = require("child_process");
 const { compileSass, sass } = require("./sass/index");
-const { src, dest } = require("gulp");
+const { src, dest, util } = require("gulp");
 const uglify = require("gulp-uglify");
 const rename = require("gulp-rename");
 const babel = require("gulp-babel");
@@ -24,6 +28,7 @@ const cssmin = require("gulp-minify-css");
 const ts = require("gulp-typescript");
 const jade = require("gulp-jade");
 const pug = require("pug");
+const sourcemaps = require("gulp-sourcemaps");
 const open = require("open");
 const through = require("through2");
 const configscreen = require("./lib/configscreen");
@@ -93,11 +98,15 @@ const readFileName = (path, fileContext) => __awaiter(void 0, void 0, void 0, fu
     if (!compileStatus[fileSuffix])
         return;
     let options = {
-        "compileErrorMsg": config.get("x-show-compile-error-messages"),
         "generateMinifiedHtml": config.get("x-generate-minified-html"),
+        "generateMinifiedCss": config.get("x-generate-minified-css"),
+        "generateMinifiedJs": config.get("x-generate-minified-js"),
+        "generateSourcemapCss": config.get("x-generate-sourcemap-css"),
+        "generateSourcemapJs": config.get("x-generate-sourcemap-js"),
+        "compileErrorMsg": config.get("x-show-compile-error-messages"),
         "generateHtmlExt": config.get("x-generate-html-ext"),
         "compileFilesInMixinFolders": config.get("x-compile-files-in-mixin-folders"),
-        "compileFilesOnSave": config.get("x-compile-files-on-save")
+        "compileFilesOnSave": config.get("x-compile-files-on-save"),
     };
     if (!options.compileFilesOnSave)
         return;
@@ -130,68 +139,114 @@ const readFileName = (path, fileContext) => __awaiter(void 0, void 0, void 0, fu
                 break;
             }
             let text = done.text;
+            if (options.generateMinifiedCss)
+                src(path)
+                    .pipe(options.generateSourcemapCss ? sourcemaps.init({ largeFile: true }) : util.noop())
+                    .pipe(empty(text))
+                    .pipe(cssmin({ compatibility: "ie7" }))
+                    .on('error', cbError)
+                    .pipe(rename({ extname: ".css", suffix: ".min" }))
+                    .pipe(options.generateSourcemapCss ? sourcemaps.write(outputPath) : util.noop())
+                    .pipe(dest(outputPath));
             src(path)
+                .pipe(options.generateSourcemapCss ? sourcemaps.init({ largeFile: true }) : util.noop())
                 .pipe(empty(text))
                 .pipe(rename({
                 extname: ".css"
             }))
-                .pipe(dest(outputPath))
-                .pipe(cssmin({ compatibility: "ie7" }))
-                .on('error', cbError)
-                .pipe(rename({
-                extname: ".css",
-                suffix: ".min"
-            }))
+                .pipe(options.generateSourcemapCss ? sourcemaps.write(outputPath) : util.noop())
                 .pipe(dest(outputPath))
                 .on('finish', cbFinished);
             break;
         case ".js":
-            if (/.dev.js|.prod.js$/g.test(path)) {
+            if (/\.dev\.js|\.prod\.js|\.min\.js$/g.test(path)) {
                 cbFinished();
-                vscode.window.showErrorMessage('The prod or dev file is the allready processed file and will not be compiled: ' + path);
+                vscode.window.showErrorMessage('The prod (.min.js) or dev file is the allready processed file and will not be compiled: ' + path);
                 break;
             }
+            if (options.generateMinifiedJs)
+                src(path)
+                    .pipe(options.generateSourcemapJs ? sourcemaps.init() : util.noop())
+                    .pipe(babel({
+                    presets: [babelEnv]
+                }))
+                    .on('error', cbError)
+                    .pipe(uglify())
+                    .on('error', cbError)
+                    .pipe(rename({ suffix: ".min" }))
+                    .pipe(options.generateSourcemapJs ? sourcemaps.write(outputPath) : util.noop())
+                    .pipe(dest(outputPath));
             src(path)
+                .pipe(options.generateSourcemapJs ? sourcemaps.init() : util.noop())
                 .pipe(babel({
                 presets: [babelEnv]
             }))
                 .on('error', cbError)
                 .pipe(rename({ suffix: ".dev" }))
-                .pipe(dest(outputPath));
-            src(path)
-                .pipe(babel({
-                presets: [babelEnv]
-            }))
-                .on('error', cbError)
-                .pipe(uglify())
-                .on('error', cbError)
-                .pipe(rename({ suffix: ".prod" }))
+                .pipe(options.generateSourcemapJs ? sourcemaps.write(outputPath) : util.noop())
                 .pipe(dest(outputPath))
                 .on('finish', cbFinished);
             break;
         case ".less":
+            if (options.generateMinifiedCss)
+                src(path)
+                    .pipe(src(path))
+                    .pipe(options.generateSourcemapCss ? sourcemaps.init({ largeFile: true }) : util.noop())
+                    .pipe(less())
+                    .on('error', cbError)
+                    .pipe(cssmin({ compatibility: "ie7" }))
+                    .pipe(rename({ suffix: ".min" }))
+                    .pipe(options.generateSourcemapCss ? sourcemaps.write(outputPath) : util.noop())
+                    .pipe(dest(outputPath));
             src(path)
+                .pipe(options.generateSourcemapCss ? sourcemaps.init({ largeFile: true }) : util.noop())
                 .pipe(less())
                 .on('error', cbError)
-                .pipe(dest(outputPath))
-                .pipe(cssmin({ compatibility: "ie7" }))
-                .pipe(rename({ suffix: ".min" }))
+                .pipe(options.generateSourcemapCss ? sourcemaps.write(outputPath) : util.noop())
                 .pipe(dest(outputPath))
                 .on('finish', cbFinished);
             break;
         case ".ts":
+            if (options.generateMinifiedJs)
+                src(path)
+                    .pipe(options.generateSourcemapJs ? sourcemaps.init() : util.noop())
+                    .pipe(ts())
+                    .on('error', cbError)
+                    .pipe(uglify())
+                    .on('error', cbError)
+                    .pipe(rename({ suffix: ".min" }))
+                    .pipe(options.generateSourcemapJs ? sourcemaps.write(outputPath) : util.noop())
+                    .pipe(dest(outputPath))
+                    .on('finish', cbFinished);
             src(path)
+                .pipe(options.generateSourcemapJs ? sourcemaps.init() : util.noop())
                 .pipe(ts())
                 .on('error', cbError)
+                .pipe(options.generateSourcemapJs ? sourcemaps.write(outputPath) : util.noop())
                 .pipe(dest(outputPath))
                 .on('finish', cbFinished);
             break;
         case ".tsx":
+            if (options.generateMinifiedJs)
+                src(path)
+                    .pipe(options.generateSourcemapJs ? sourcemaps.init() : util.noop())
+                    .pipe(ts({
+                    jsx: "react"
+                }))
+                    .on('error', cbError)
+                    .pipe(uglify())
+                    .on('error', cbError)
+                    .pipe(rename({ suffix: ".min" }))
+                    .pipe(options.generateSourcemapJs ? sourcemaps.write(outputPath) : util.noop())
+                    .pipe(dest(outputPath))
+                    .on('finish', cbFinished);
             src(path)
+                .pipe(options.generateSourcemapJs ? sourcemaps.init() : util.noop())
                 .pipe(ts({
                 jsx: "react"
             }))
                 .on('error', cbError)
+                .pipe(options.generateSourcemapJs ? sourcemaps.write(outputPath) : util.noop())
                 .pipe(dest(outputPath))
                 .on('finish', cbFinished);
             break;
@@ -256,7 +311,9 @@ const readFileName = (path, fileContext) => __awaiter(void 0, void 0, void 0, fu
 function activate(context) {
     configscreen.activate(context);
     console.log('Extension "compile-superhero" is ready now!');
-    vscode.window.setStatusBarMessage(`Compile-Superhero: watching ...`);
+    if (vscode.workspace.getConfiguration("compile-hero")
+        .get("x-compile-files-on-save"))
+        vscode.window.setStatusBarMessage(`Compile-Superhero: watching ...`);
     let openInBrowser = vscode.commands.registerCommand("extension.openInBrowser", path => {
         let uri = path.fsPath;
         let platform = process.platform;

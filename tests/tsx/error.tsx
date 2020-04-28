@@ -1,1 +1,3 @@
-const a: _ number = 1;
+const a:number = 1;
+
+ ({;

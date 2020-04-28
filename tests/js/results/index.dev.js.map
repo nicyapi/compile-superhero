@@ -1,0 +1,1 @@
+{"version":3,"sources":["index.js"],"names":["a","console","log"],"mappings":";;AAAA,IAAMA,CAAC,GAAO,CAAC,CAAD,EAAG,CAAH,EAAK,CAAL,CAAP,SAAP;AACAC,OAAO,CAACC,GAAR,CAAY,GAAZ","sourcesContent":["const a = [...[1,2,3]]\r\nconsole.log(123)\r\n"],"file":"../../../../../../index.dev.js"}

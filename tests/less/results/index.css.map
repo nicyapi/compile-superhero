@@ -1,0 +1,1 @@
+{"version":3,"sources":["mixins/ignore.less","index.less"],"names":[],"mappings":"AAAA;EACI,WAAA;;ACCJ;EACI,UAAA","sourcesContent":["p {\r\n    x-ignore: 1;\r\n}","@import \"./mixins/ignore.less\";\r\n\r\np {\r\n    color: red;\r\n}"],"file":"../../../../../../index.css"}
