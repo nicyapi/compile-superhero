@@ -282,6 +282,7 @@
   },
   "scripts": {
     "build": "vsce package",
+    "deploy:www": "npx open-cli https://marketplace.visualstudio.com/manage/publishers/BananaAcid",
     "vscode:prepublish": "yarn run compile",
     "compile": "tsc --project ./src/tsconfig.json",
     "watch": "tsc -watch --project ./src/tsconfig.json",
