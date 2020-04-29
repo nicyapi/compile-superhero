@@ -10,14 +10,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 /*
- Known BUG:
+ Known BUGs:
   - tsx recovers after an error: done with errors. It should not output on error.
+  - sass/scss sourcemaps are no real sourcemaps (they are based on compiled sass/scss)
+  - sass/scss compiles because of proccess.chdir(sassfile_root) -> this should not be.
 */
 const vscode = require("vscode");
 const fs = require("fs");
 const p = require("path");
 const child_process_1 = require("child_process");
-const { compileSass, sass } = require("./sass/index");
+const index_1 = require("./sass/index");
 const { src, dest, util } = require("gulp");
 const uglify = require("gulp-uglify");
 const rename = require("gulp-rename");
@@ -31,7 +33,9 @@ const pug = require("pug");
 const sourcemaps = require("gulp-sourcemaps");
 const open = require("open");
 const through = require("through2");
+const applySourceMap = require('vinyl-sourcemaps-apply');
 const configscreen = require("./lib/configscreen");
+const sass = new index_1.default();
 const readFileContext = (path) => {
     return fs.readFileSync(path).toString();
 };
@@ -60,19 +64,23 @@ const transformPort = (data) => {
     });
     return port;
 };
-const empty = function (code) {
+const empty = function (code, map) {
     let stream = through.obj((file, encoding, callback) => {
         //debugger;
         if (!file.isBuffer()) {
             return callback();
         }
         file.contents = Buffer.from(code || "");
+        if (file.sourceMap && map) {
+            applySourceMap(file, map);
+        }
         stream.push(file);
         callback();
     });
     return stream;
 };
-const readFileName = (path, fileContext) => __awaiter(void 0, void 0, void 0, function* () {
+const readFileName = (uri, fileContext) => __awaiter(void 0, void 0, void 0, function* () {
+    let path = uri.fsPath;
     let fileSuffix = fileType(path);
     let config = vscode.workspace.getConfiguration("compile-hero");
     let outputDirectoryPath = {
@@ -130,9 +138,9 @@ const readFileName = (path, fileContext) => __awaiter(void 0, void 0, void 0, fu
     switch (fileSuffix) {
         case ".sass":
         case ".scss":
-            let done = yield compileSass(fileContext, {
+            let done = yield sass.compileOne(uri, {
                 indentedSyntax: fileSuffix === ".sass" ? 1 : 0,
-                style: sass.style.expanded || sass.style.compressed
+                style: index_1.default.style.expanded,
             });
             if (done.status || done.formatted) {
                 cbError(new Error('SASS: ' + path + ': ' + (done.message || done.formatted) + (done.line ? ' (@' + done.line + ':' + done.column + ')' : '')));
@@ -144,9 +152,8 @@ const readFileName = (path, fileContext) => __awaiter(void 0, void 0, void 0, fu
                     .pipe(options.generateSourcemapCss ? sourcemaps.init({ largeFile: true }) : util.noop())
                     .pipe(empty(text))
                     .pipe(cssmin({ compatibility: "ie7" }))
-                    .on('error', cbError)
                     .pipe(rename({ extname: ".css", suffix: ".min" }))
-                    .pipe(options.generateSourcemapCss ? sourcemaps.write(outputPath) : util.noop())
+                    .pipe(options.generateSourcemapCss ? sourcemaps.write('./') : util.noop())
                     .pipe(dest(outputPath));
             src(path)
                 .pipe(options.generateSourcemapCss ? sourcemaps.init({ largeFile: true }) : util.noop())
@@ -154,7 +161,7 @@ const readFileName = (path, fileContext) => __awaiter(void 0, void 0, void 0, fu
                 .pipe(rename({
                 extname: ".css"
             }))
-                .pipe(options.generateSourcemapCss ? sourcemaps.write(outputPath) : util.noop())
+                .pipe(options.generateSourcemapCss ? sourcemaps.write('./') : util.noop())
                 .pipe(dest(outputPath))
                 .on('finish', cbFinished);
             break;
@@ -174,7 +181,7 @@ const readFileName = (path, fileContext) => __awaiter(void 0, void 0, void 0, fu
                     .pipe(uglify())
                     .on('error', cbError)
                     .pipe(rename({ suffix: ".min" }))
-                    .pipe(options.generateSourcemapJs ? sourcemaps.write(outputPath) : util.noop())
+                    .pipe(options.generateSourcemapJs ? sourcemaps.write('./') : util.noop())
                     .pipe(dest(outputPath));
             src(path)
                 .pipe(options.generateSourcemapJs ? sourcemaps.init() : util.noop())
@@ -183,7 +190,7 @@ const readFileName = (path, fileContext) => __awaiter(void 0, void 0, void 0, fu
             }))
                 .on('error', cbError)
                 .pipe(rename({ suffix: ".dev" }))
-                .pipe(options.generateSourcemapJs ? sourcemaps.write(outputPath) : util.noop())
+                .pipe(options.generateSourcemapJs ? sourcemaps.write('./') : util.noop())
                 .pipe(dest(outputPath))
                 .on('finish', cbFinished);
             break;
@@ -196,13 +203,13 @@ const readFileName = (path, fileContext) => __awaiter(void 0, void 0, void 0, fu
                     .on('error', cbError)
                     .pipe(cssmin({ compatibility: "ie7" }))
                     .pipe(rename({ suffix: ".min" }))
-                    .pipe(options.generateSourcemapCss ? sourcemaps.write(outputPath) : util.noop())
+                    .pipe(options.generateSourcemapCss ? sourcemaps.write('./') : util.noop())
                     .pipe(dest(outputPath));
             src(path)
                 .pipe(options.generateSourcemapCss ? sourcemaps.init({ largeFile: true }) : util.noop())
                 .pipe(less())
                 .on('error', cbError)
-                .pipe(options.generateSourcemapCss ? sourcemaps.write(outputPath) : util.noop())
+                .pipe(options.generateSourcemapCss ? sourcemaps.write('./') : util.noop())
                 .pipe(dest(outputPath))
                 .on('finish', cbFinished);
             break;
@@ -215,14 +222,14 @@ const readFileName = (path, fileContext) => __awaiter(void 0, void 0, void 0, fu
                     .pipe(uglify())
                     .on('error', cbError)
                     .pipe(rename({ suffix: ".min" }))
-                    .pipe(options.generateSourcemapJs ? sourcemaps.write(outputPath) : util.noop())
+                    .pipe(options.generateSourcemapJs ? sourcemaps.write('./') : util.noop())
                     .pipe(dest(outputPath))
                     .on('finish', cbFinished);
             src(path)
                 .pipe(options.generateSourcemapJs ? sourcemaps.init() : util.noop())
                 .pipe(ts())
                 .on('error', cbError)
-                .pipe(options.generateSourcemapJs ? sourcemaps.write(outputPath) : util.noop())
+                .pipe(options.generateSourcemapJs ? sourcemaps.write('./') : util.noop())
                 .pipe(dest(outputPath))
                 .on('finish', cbFinished);
             break;
@@ -237,7 +244,7 @@ const readFileName = (path, fileContext) => __awaiter(void 0, void 0, void 0, fu
                     .pipe(uglify())
                     .on('error', cbError)
                     .pipe(rename({ suffix: ".min" }))
-                    .pipe(options.generateSourcemapJs ? sourcemaps.write(outputPath) : util.noop())
+                    .pipe(options.generateSourcemapJs ? sourcemaps.write('./') : util.noop())
                     .pipe(dest(outputPath))
                     .on('finish', cbFinished);
             src(path)
@@ -246,7 +253,7 @@ const readFileName = (path, fileContext) => __awaiter(void 0, void 0, void 0, fu
                 jsx: "react"
             }))
                 .on('error', cbError)
-                .pipe(options.generateSourcemapJs ? sourcemaps.write(outputPath) : util.noop())
+                .pipe(options.generateSourcemapJs ? sourcemaps.write('./') : util.noop())
                 .pipe(dest(outputPath))
                 .on('finish', cbFinished);
             break;
@@ -344,10 +351,9 @@ function activate(context) {
             vscode.window.showErrorMessage('SORRY. Does not work on Windows. But on OSX/Linux.');
         }
     }));
-    let compileFile = vscode.commands.registerCommand("extension.compileFile", path => {
-        let uri = path.fsPath;
-        console.log(uri);
-        const fileContext = readFileContext(uri);
+    let compileFile = vscode.commands.registerCommand("extension.compileFile", (uri) => {
+        console.log(uri.fsPath);
+        const fileContext = readFileContext(uri.fsPath);
         readFileName(uri, fileContext);
     });
     let generateLocalDefaultConfig = vscode.commands.registerCommand("extension.generateLocalDefaultConfig", () => __awaiter(this, void 0, void 0, function* () {
@@ -373,9 +379,9 @@ function activate(context) {
     context.subscriptions.push(compileFile);
     context.subscriptions.push(generateLocalDefaultConfig);
     vscode.workspace.onDidSaveTextDocument(document => {
-        const { fileName } = document;
-        const fileContext = readFileContext(fileName);
-        readFileName(fileName, fileContext);
+        const { uri } = document;
+        const fileContext = readFileContext(uri.fsPath);
+        readFileName(uri, fileContext);
     });
 }
 exports.activate = activate;

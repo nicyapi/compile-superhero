@@ -1,0 +1,1 @@
+{"version":3,"sources":["script.ts"],"names":[],"mappings":"AAAA,QAAQ,CAAC,KAAK,CAAC,iBAAiB,CAAC,CAAC;AAClC,OAAO,CAAC,GAAG,CAAC,OAAO,CAAC,CAAC","file":"script.js","sourcesContent":["document.write('Script WORKING!');\r\nconsole.log('ready');"]}

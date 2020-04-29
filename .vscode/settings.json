@@ -10,5 +10,8 @@
     "typescript.tsc.autoDetect": "off",
 
     // Turn off THIS plugin, in case there is a VSCode problem that does NOT prevent it from loading
-    "compile-hero.x-compile-files-on-save": false
+    "compile-hero.x-compile-files-on-save": false,
+
+    // use live server to check on sourcemaps
+    "liveServer.settings.root": "./tests/srcmaps/"
 }

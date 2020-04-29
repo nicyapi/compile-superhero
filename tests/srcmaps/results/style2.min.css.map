@@ -1,0 +1,1 @@
+{"version":3,"sources":["style2.sass"],"names":[],"mappings":"AAAA,IACE,WAAY,OAIZ,MAAO","file":"style2.min.css","sourcesContent":["@import './mixins/ignore2'\r\n\r\ndiv\r\n    color: green"]}

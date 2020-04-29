@@ -2,6 +2,7 @@
 
 Compared to compile-hero:
 
+- Added support for sass/scss files to be able to inlcude other sass/scss files
 - Added support for sourcemaps
 - Added support to disable .min.* files
 - Added a configuration screen for local workfolder (see screenshot below)

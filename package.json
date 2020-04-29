@@ -15,7 +15,7 @@
     }
   ],
   "publisher": "BananaAcid",
-  "version": "10.2.0",
+  "version": "10.2.1",
   "preview": false,
   "icon": "logos/hero2.png",
   "homepage": "https://github.com/BananaAcid/compile-superhero",
@@ -307,7 +307,8 @@
     "gulp-uglify": "^3.0.2",
     "open": "^6.4.0",
     "pug": "^2.0.4",
-    "typescript": "^3.3.1"
+    "typescript": "^3.3.1",
+    "vinyl-sourcemaps-apply": "^0.2.1"
   },
   "devDependencies": {
     "vscode": "^1.1.28",

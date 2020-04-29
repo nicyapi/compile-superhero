@@ -7,6 +7,7 @@ vsc-extension-quickstart.md
 **/tsconfig.json
 **/tslint.json
 **/*.map
+**/**/*.map
 **/*.ts
 tests
 screenshots

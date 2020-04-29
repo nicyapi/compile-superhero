@@ -1,15 +1,14 @@
 /*
- Known BUG:
+ Known BUGs:
   - tsx recovers after an error: done with errors. It should not output on error.
+  - sass/scss sourcemaps are no real sourcemaps (they are based on compiled sass/scss)
+  - sass/scss compiles because of proccess.chdir(sassfile_root) -> this should not be.
 */
-import * as vscode from "vscode";
+import * as vscode from 'vscode';
 import * as fs from "fs";
 import * as p from "path";
 import { exec } from "child_process";
-import { Pipe, Stream } from "stream";
-import { resolve } from "dns";
-import { debug } from "util";
-const { compileSass, sass } = require("./sass/index");
+import SassHelper from "./sass/index";
 const { src, dest, util } = require("gulp");
 const uglify = require("gulp-uglify");
 const rename = require("gulp-rename");
@@ -23,8 +22,11 @@ const pug = require("pug");
 const sourcemaps = require("gulp-sourcemaps");
 const open = require("open");
 const through = require("through2");
+const applySourceMap = require('vinyl-sourcemaps-apply');
 
 import * as configscreen from "./lib/configscreen";
+
+const sass = new SassHelper();
 
 const readFileContext = (path: string): string => {
   return fs.readFileSync(path).toString();
@@ -54,20 +56,26 @@ const transformPort = (data: string): string => {
   });
   return port;
 };
-const empty = function(code: string) {
+const empty = function(code: string, map?: any) {
   let stream = through.obj((file: any, encoding: any, callback: any) => {
     //debugger;
     if (!file.isBuffer()) {
       return callback();
     }
     file.contents = Buffer.from(code || "");
+    
+    if (file.sourceMap && map) {
+      applySourceMap(file, map);
+    }
+
     stream.push(file);
     callback();
   });
   return stream;
 };
 
-const readFileName = async (path: string, fileContext: string) => {
+const readFileName = async (uri: vscode.Uri, fileContext: string) => {
+  let path = uri.fsPath;
   let fileSuffix = fileType(path);
   let config = vscode.workspace.getConfiguration("compile-hero");
   let outputDirectoryPath: any = {
@@ -127,9 +135,10 @@ const readFileName = async (path: string, fileContext: string) => {
 
     case ".sass":
     case ".scss":
-      let done = await compileSass(fileContext, {
+      let done = await sass.compileOne(uri, {
         indentedSyntax: fileSuffix === ".sass" ? 1 : 0,
-        style: sass.style.expanded || sass.style.compressed
+        style: SassHelper.style.expanded,   // || SassHelper.style.compressed
+        // sourceMapFile: 'file', sourceMapRoot: 'root',    -> https://github.com/medialize/sass.js/blob/master/docs/api.md#sourcemap-options
       });
 
       if (done.status || done.formatted) {
@@ -142,10 +151,9 @@ const readFileName = async (path: string, fileContext: string) => {
           .pipe(options.generateSourcemapCss ? sourcemaps.init({ largeFile: true }) : util.noop())
           .pipe(empty(text))
           .pipe(cssmin({ compatibility: "ie7" }))
-          .on('error', cbError)
           .pipe(rename({ extname: ".css", suffix: ".min" }))
-          .pipe(options.generateSourcemapCss ? sourcemaps.write(outputPath) : util.noop())
-          .pipe(dest(outputPath))
+          .pipe(options.generateSourcemapCss ? sourcemaps.write('./') : util.noop())
+          .pipe(dest(outputPath));
 
       src(path)
         .pipe(options.generateSourcemapCss ? sourcemaps.init({ largeFile: true }) : util.noop())
@@ -155,7 +163,7 @@ const readFileName = async (path: string, fileContext: string) => {
             extname: ".css"
           })
         )
-        .pipe(options.generateSourcemapCss ? sourcemaps.write(outputPath) : util.noop())
+        .pipe(options.generateSourcemapCss ? sourcemaps.write('./') : util.noop())
         .pipe(dest(outputPath))
         .on('finish', cbFinished);
       break;
@@ -180,7 +188,7 @@ const readFileName = async (path: string, fileContext: string) => {
           .pipe(uglify())
           .on('error', cbError)
           .pipe(rename({ suffix: ".min" }))
-          .pipe(options.generateSourcemapJs ? sourcemaps.write(outputPath) : util.noop())
+          .pipe(options.generateSourcemapJs ? sourcemaps.write('./') : util.noop())
           .pipe(dest(outputPath));
 
       src(path)
@@ -192,7 +200,7 @@ const readFileName = async (path: string, fileContext: string) => {
         )
         .on('error', cbError)
         .pipe(rename({ suffix: ".dev" }))
-        .pipe(options.generateSourcemapJs ? sourcemaps.write(outputPath) : util.noop())
+        .pipe(options.generateSourcemapJs ? sourcemaps.write('./') : util.noop())
         .pipe(dest(outputPath))
         .on('finish', cbFinished);
       break;
@@ -206,14 +214,14 @@ const readFileName = async (path: string, fileContext: string) => {
           .on('error', cbError)
           .pipe(cssmin({ compatibility: "ie7" }))
           .pipe(rename({ suffix: ".min" }))
-          .pipe(options.generateSourcemapCss ? sourcemaps.write(outputPath) : util.noop())
+          .pipe(options.generateSourcemapCss ? sourcemaps.write('./') : util.noop())
           .pipe(dest(outputPath));
       
       src(path)
         .pipe(options.generateSourcemapCss ? sourcemaps.init({ largeFile: true }) : util.noop())
         .pipe(less())
         .on('error', cbError)
-        .pipe(options.generateSourcemapCss ? sourcemaps.write(outputPath) : util.noop())
+        .pipe(options.generateSourcemapCss ? sourcemaps.write('./') : util.noop())
         .pipe(dest(outputPath))
         .on('finish', cbFinished);
       break;
@@ -227,7 +235,7 @@ const readFileName = async (path: string, fileContext: string) => {
           .pipe(uglify())
           .on('error', cbError)
           .pipe(rename({ suffix: ".min" }))
-          .pipe(options.generateSourcemapJs ? sourcemaps.write(outputPath) : util.noop())
+          .pipe(options.generateSourcemapJs ? sourcemaps.write('./') : util.noop())
           .pipe(dest(outputPath))
           .on('finish', cbFinished);
 
@@ -235,7 +243,7 @@ const readFileName = async (path: string, fileContext: string) => {
         .pipe(options.generateSourcemapJs ? sourcemaps.init() : util.noop())
         .pipe(ts())
         .on('error', cbError)
-        .pipe(options.generateSourcemapJs ? sourcemaps.write(outputPath) : util.noop())
+        .pipe(options.generateSourcemapJs ? sourcemaps.write('./') : util.noop())
         .pipe(dest(outputPath))
         .on('finish', cbFinished);
       break;
@@ -251,7 +259,7 @@ const readFileName = async (path: string, fileContext: string) => {
           .pipe(uglify())
           .on('error', cbError)
           .pipe(rename({ suffix: ".min" }))
-          .pipe(options.generateSourcemapJs ? sourcemaps.write(outputPath) : util.noop())
+          .pipe(options.generateSourcemapJs ? sourcemaps.write('./') : util.noop())
           .pipe(dest(outputPath))
           .on('finish', cbFinished);
 
@@ -261,7 +269,7 @@ const readFileName = async (path: string, fileContext: string) => {
           jsx: "react"
         }))
         .on('error', cbError)
-        .pipe(options.generateSourcemapJs ? sourcemaps.write(outputPath) : util.noop())
+        .pipe(options.generateSourcemapJs ? sourcemaps.write('./') : util.noop())
         .pipe(dest(outputPath))
         .on('finish', cbFinished);
       break;
@@ -381,10 +389,9 @@ export function activate(context: vscode.ExtensionContext) {
   );
   let compileFile = vscode.commands.registerCommand(
     "extension.compileFile",
-    path => {
-      let uri = path.fsPath;
-      console.log(uri);
-      const fileContext: string = readFileContext(uri);
+    (uri: vscode.Uri) => {
+      console.log(uri.fsPath);
+      const fileContext: string = readFileContext(uri.fsPath);
       readFileName(uri, fileContext);
     }
   );
@@ -417,9 +424,9 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(compileFile);
   context.subscriptions.push(generateLocalDefaultConfig);
   vscode.workspace.onDidSaveTextDocument(document => {
-    const { fileName } = document;
-    const fileContext: string = readFileContext(fileName);
-    readFileName(fileName, fileContext);
+    const { uri } = document;
+    const fileContext: string = readFileContext(uri.fsPath);
+    readFileName(uri, fileContext);
   });
 }
 export function deactivate() {}

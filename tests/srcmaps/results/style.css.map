@@ -1,0 +1,1 @@
+{"version":3,"sources":["mixins/ignore.less","style.less"],"names":[],"mappings":"AAAA;EACI,0BAAA;;ACCJ;EACI,UAAA;EACA,iBAAA","sourcesContent":["p {\r\n    text-decoration: underline;\r\n}","@import \"./mixins/ignore.less\";\r\n\r\np {\r\n    color: red;\r\n    font-weight: bold;\r\n}"],"file":"style.css"}
