@@ -35,14 +35,15 @@ Compile on save `(ctrl+s)` - or select `Compile File(s)` at the right-click menu
 - Support to open `html` files to preview in chrome browser
 - minify `.js`, `.css` and `.html` files
 
-|Before Compile|After Compile|
-|-|-|
-|.pug|.html|
-|.jade|.html|
-|.scss/.sass|.css|
-|.less|.css|
-|.ts/.tsx|.js(JSX)|
-|.js(ES6)|.js(ES5)|
+|Before Compile|After Compile|After Compile to min|
+|-          |-       |         |
+|.html      |(copied)|.min.html|
+|.pug       |.html   |.min.html|
+|.jade      |.html   |.min.html|
+|.scss/.sass|.css    |.min.css |
+|.less      |.css    |.min.css |
+|.ts/.tsx   |.js(JSX) & .dev.js|.min.js &.dev.min.js |
+|.js(ES6)   |.js(ES5) & .dev.js|.min.js &.dev.min.js |
 
 Easy to use. When you writing a file, press save (<kbd>ctrl</kbd> + <kbd>s</kbd>) to generate the compiled file in the same directory (or different if changed in the settings). No need for `gulp` or `webpack` or external helper tools.
 

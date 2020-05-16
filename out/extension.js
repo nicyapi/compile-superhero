@@ -34,6 +34,7 @@ const sourcemaps = require("gulp-sourcemaps");
 const open = require("open");
 const through = require("through2");
 const applySourceMap = require('vinyl-sourcemaps-apply');
+const htmlmin = require('gulp-htmlmin');
 const configscreen = require("./lib/configscreen");
 const sass = new index_1.default();
 const readFileContext = (path) => {
@@ -84,6 +85,7 @@ const readFileName = (uri, fileContext) => __awaiter(void 0, void 0, void 0, fun
     let fileSuffix = fileType(path);
     let config = vscode.workspace.getConfiguration("compile-hero");
     let outputDirectoryPath = {
+        ".html": config.get("html-output-directory") || "",
         ".js": config.get("javascript-output-directory") || "",
         ".scss": config.get("sass-output-directory") || "",
         ".sass": config.get("sass-output-directory") || "",
@@ -94,6 +96,7 @@ const readFileName = (uri, fileContext) => __awaiter(void 0, void 0, void 0, fun
         ".pug": config.get("pug-output-directory") || ""
     };
     let compileStatus = {
+        ".html": config.get("html-output-toggle"),
         ".js": config.get("javascript-output-toggle"),
         ".scss": config.get("sass-output-toggle"),
         ".sass": config.get("sass-output-toggle"),
@@ -274,11 +277,31 @@ const readFileName = (uri, fileContext) => __awaiter(void 0, void 0, void 0, fun
                 .on('finish', cbFinished);
             break;
         case ".pug":
-            if (options.generateMinifiedHtml)
+            try {
+                if (options.generateMinifiedHtml)
+                    src(path)
+                        .pipe(empty(yield new Promise((resolve, reject) => {
+                        pug.render(readFileContext(path), {
+                            filename: path,
+                            pretty: false
+                        }, (err, data) => { if (err) {
+                            cbError(err);
+                            reject(err);
+                        }
+                        else
+                            resolve(data); });
+                    })))
+                        .on('error', cbError)
+                        .pipe(rename({
+                        suffix: ".min",
+                        extname: options.generateHtmlExt
+                    }))
+                        .pipe(dest(outputPath));
                 src(path)
                     .pipe(empty(yield new Promise((resolve, reject) => {
                     pug.render(readFileContext(path), {
-                        pretty: false
+                        filename: path,
+                        pretty: true
                     }, (err, data) => { if (err) {
                         cbError(err);
                         reject(err);
@@ -288,26 +311,30 @@ const readFileName = (uri, fileContext) => __awaiter(void 0, void 0, void 0, fun
                 })))
                     .on('error', cbError)
                     .pipe(rename({
+                    extname: options.generateHtmlExt
+                }))
+                    .pipe(dest(outputPath))
+                    .on('finish', cbFinished);
+            }
+            catch (e) { }
+            break;
+        case ".html":
+            if (options.generateMinifiedHtml)
+                src(path)
+                    .pipe(htmlmin({
+                    collapseWhitespace: true,
+                    caseSensitive: true,
+                    continueOnParseError: false,
+                }))
+                    .on('error', cbError)
+                    .pipe(rename({
                     suffix: ".min",
                     extname: options.generateHtmlExt
                 }))
                     .pipe(dest(outputPath));
             src(path)
-                .pipe(empty(yield new Promise((resolve, reject) => {
-                pug.render(readFileContext(path), {
-                    pretty: true
-                }, (err, data) => { if (err) {
-                    cbError(err);
-                    reject(err);
-                }
-                else
-                    resolve(data); });
-            })))
-                .on('error', cbError)
-                .pipe(rename({
-                extname: options.generateHtmlExt
-            }))
                 .pipe(dest(outputPath))
+                .on('error', cbError)
                 .on('finish', cbFinished);
             break;
         default:

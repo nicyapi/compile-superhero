@@ -1,4 +1,6 @@
 # Change Log
+- 2020-05-16 Added .html minification and copying from source to target
+- 2020-05-16 Fixed a regression where PUG did crash the PluginHost on an error 
 - 2020-04-28 Fixed never actually compiling imports in sass/scss
 - 2020-04-28 Added more options (minified, sourcemaps)
 - 2020-04-28 Changed order of options in settings screen

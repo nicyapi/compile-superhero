@@ -24,6 +24,9 @@
         "Compiling CSS written in LESS style to globally supported CSS.",
         "See <a href=\"http://lesscss.org/\" target=\"_blank\">LESS homepage</a> for an in depth explanation."
     ],
+    "html": [
+        "Enabling HTML, will allow minification and file extension changes according to the advanced options."
+    ],
     "jade": [
         "Compiling HTML written in JADE (old version of PUG) to globally supported HTML.",
         "See <a href=\"http://jade-lang.com/\" target=\"_blank\">JADE homepage</a> for an in depth explanation."

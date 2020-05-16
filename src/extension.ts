@@ -23,6 +23,7 @@ const sourcemaps = require("gulp-sourcemaps");
 const open = require("open");
 const through = require("through2");
 const applySourceMap = require('vinyl-sourcemaps-apply');
+const htmlmin = require('gulp-htmlmin');
 
 import * as configscreen from "./lib/configscreen";
 
@@ -79,6 +80,7 @@ const readFileName = async (uri: vscode.Uri, fileContext: string) => {
   let fileSuffix = fileType(path);
   let config = vscode.workspace.getConfiguration("compile-hero");
   let outputDirectoryPath: any = {
+    ".html": config.get<string>("html-output-directory") || "",
     ".js":   config.get<string>("javascript-output-directory") || "",
     ".scss": config.get<string>("sass-output-directory") || "",
     ".sass": config.get<string>("sass-output-directory") || "",
@@ -89,6 +91,7 @@ const readFileName = async (uri: vscode.Uri, fileContext: string) => {
     ".pug":  config.get<string>("pug-output-directory") || ""
   };
   let compileStatus: any = {
+    ".html": config.get<boolean>("html-output-toggle"),
     ".js":   config.get<boolean>("javascript-output-toggle"),
     ".scss": config.get<boolean>("sass-output-toggle"),
     ".sass": config.get<boolean>("sass-output-toggle"),
@@ -295,17 +298,59 @@ const readFileName = async (uri: vscode.Uri, fileContext: string) => {
       break;
 
     case ".pug":
-      if (options.generateMinifiedHtml)
+      try { 
+        if (options.generateMinifiedHtml)
+          src(path)
+            .pipe(
+              empty(
+                await new Promise<string>((resolve, reject) => {
+                  pug.render(readFileContext(path), {
+                    filename: path,
+                    pretty: false
+                  }, (err: any, data: string) => { if (err) {cbError(err); reject(err);} else resolve(data); } )
+                })
+              )
+            )
+            .on('error', cbError)
+            .pipe(
+              rename({
+                suffix: ".min",
+                extname: options.generateHtmlExt
+              })
+            )
+            .pipe(dest(outputPath));
+
         src(path)
           .pipe(
             empty(
               await new Promise<string>((resolve, reject) => {
                 pug.render(readFileContext(path), {
-                  pretty: false
+                  filename: path,
+                  pretty: true
                 }, (err: any, data: string) => { if (err) {cbError(err); reject(err);} else resolve(data); } )
               })
             )
           )
+          .on('error', cbError)
+          .pipe(
+            rename({
+              extname: options.generateHtmlExt
+            })
+          )
+          .pipe(dest(outputPath))
+          .on('finish', cbFinished);
+
+        } catch(e) {}
+      break;
+
+    case ".html":
+      if (options.generateMinifiedHtml)
+        src(path)
+          .pipe(htmlmin({
+            collapseWhitespace: true,
+            caseSensitive: true,
+            continueOnParseError: false,
+          }))
           .on('error', cbError)
           .pipe(
             rename({
@@ -316,22 +361,8 @@ const readFileName = async (uri: vscode.Uri, fileContext: string) => {
           .pipe(dest(outputPath));
 
       src(path)
-        .pipe(
-          empty(
-            await new Promise<string>((resolve, reject) => {
-              pug.render(readFileContext(path), {
-                pretty: true
-              }, (err: any, data: string) => { if (err) {cbError(err); reject(err);} else resolve(data); } )
-            })
-          )
-        )
-        .on('error', cbError)
-        .pipe(
-          rename({
-            extname: options.generateHtmlExt
-          })
-        )
         .pipe(dest(outputPath))
+        .on('error', cbError)
         .on('finish', cbFinished);
       break;
 

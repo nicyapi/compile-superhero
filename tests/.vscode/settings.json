@@ -21,5 +21,7 @@
     "compile-hero.x-generate-minified-css": true,
     "compile-hero.x-generate-sourcemap-css": true,
     "compile-hero.x-generate-minified-js": true,
-    "compile-hero.x-generate-sourcemap-js": true
+    "compile-hero.x-generate-sourcemap-js": true,
+    "compile-hero.html-output-directory": "./results/",
+    "compile-hero.html-output-toggle": true
 }
