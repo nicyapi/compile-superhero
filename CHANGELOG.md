@@ -1,4 +1,7 @@
 # Change Log
+- 2020-05-18 Added the `x-omit-dev-ext-js` option to disable the `.dev.js` naming to only generate `.js`
+- 2020-05-18 Changed css-minifier to not try to include imports (less/sass did so anyways if told to) - fixes a crash
+- 2020-05-18 Added errorhandling on writing to destination
 - 2020-05-16 Added .html minification and copying from source to target
 - 2020-05-16 Fixed a regression where PUG did crash the PluginHost on an error 
 - 2020-04-28 Fixed never actually compiling imports in sass/scss

@@ -1,0 +1,1 @@
+{"version":3,"sources":["index_minify.less"],"names":[],"mappings":"YACY","sourcesContent":["// works with `processImport: false`\n@import url(\"doesnotexist_locally.css\");"],"file":"index_minify.css"}

@@ -49,6 +49,11 @@
     "compile-hero.x-generate-sourcemap-js": [
         "Sourcemaps allow the browser to show the original, unoptimized JavaScript/TypeScript when debugging.",
         "Helpful while debugging using breakpoints in code or finding an error. <a href='https://www.html5rocks.com/en/tutorials/developertools/sourcemaps/' target='_blank'>Explanation</a>"
+    ],
+
+    "compile-hero.x-omit-dev-ext-js": [
+        "The `.dev.js` extension is used for non-minified Javascript files. SuperHero will also not try to compile those again.",
+        "You should always use minified `.min.js` scripts in your projects."
     ]
 
 }

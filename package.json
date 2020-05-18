@@ -15,7 +15,7 @@
     }
   ],
   "publisher": "BananaAcid",
-  "version": "10.3.0",
+  "version": "10.3.1",
   "preview": false,
   "icon": "logos/hero2.png",
   "homepage": "https://github.com/BananaAcid/compile-superhero",
@@ -252,6 +252,12 @@
           "type": "boolean",
           "default": true,
           "description": "Enable to also generate debugging sourcemaps for JavaScript (*.js.map) files.",
+          "csgroup": "js"
+        },
+        "compile-hero.x-omit-dev-ext-js": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable to omit the `.dev` extension on generated JavaScript (*.dev.js) files.",
           "csgroup": "js"
         }
       }

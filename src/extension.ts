@@ -114,6 +114,8 @@ const readFileName = async (uri: vscode.Uri, fileContext: string) => {
     "generateHtmlExt":      config.get<boolean>("x-generate-html-ext"),
     "compileFilesInMixinFolders": config.get<boolean>("x-compile-files-in-mixin-folders"),
     "compileFilesOnSave":   config.get<boolean>("x-compile-files-on-save"),
+
+    "omitDevExtJs":         config.get<boolean>("x-omit-dev-ext-js"),
   }
   if (!options.compileFilesOnSave) return;
   if (!options.compileFilesInMixinFolders && /[\/\\]mixin(s)*[\/\\]/.test(path)) { console.info('ignoring mixin', path);  return; }
@@ -153,10 +155,13 @@ const readFileName = async (uri: vscode.Uri, fileContext: string) => {
         src(path)
           .pipe(options.generateSourcemapCss ? sourcemaps.init({ largeFile: true }) : util.noop())
           .pipe(empty(text))
-          .pipe(cssmin({ compatibility: "ie7" }))
+          .pipe(cssmin({ processImport: false, compatibility: "ie7" }))
+          .on('error', cbError)
           .pipe(rename({ extname: ".css", suffix: ".min" }))
           .pipe(options.generateSourcemapCss ? sourcemaps.write('./') : util.noop())
-          .pipe(dest(outputPath));
+          .pipe(dest(outputPath))
+          .on('error', cbError)
+          ;
 
       src(path)
         .pipe(options.generateSourcemapCss ? sourcemaps.init({ largeFile: true }) : util.noop())
@@ -168,6 +173,7 @@ const readFileName = async (uri: vscode.Uri, fileContext: string) => {
         )
         .pipe(options.generateSourcemapCss ? sourcemaps.write('./') : util.noop())
         .pipe(dest(outputPath))
+        .on('error', cbError)
         .on('finish', cbFinished);
       break;
 
@@ -192,7 +198,9 @@ const readFileName = async (uri: vscode.Uri, fileContext: string) => {
           .on('error', cbError)
           .pipe(rename({ suffix: ".min" }))
           .pipe(options.generateSourcemapJs ? sourcemaps.write('./') : util.noop())
-          .pipe(dest(outputPath));
+          .pipe(dest(outputPath))
+          .on('error', cbError)
+          ;
 
       src(path)
         .pipe(options.generateSourcemapJs ? sourcemaps.init() : util.noop())
@@ -202,9 +210,10 @@ const readFileName = async (uri: vscode.Uri, fileContext: string) => {
           })
         )
         .on('error', cbError)
-        .pipe(rename({ suffix: ".dev" }))
+        .pipe(!options.omitDevExtJs ? rename({ suffix: '.dev' }) : util.noop())
         .pipe(options.generateSourcemapJs ? sourcemaps.write('./') : util.noop())
         .pipe(dest(outputPath))
+        .on('error', cbError)
         .on('finish', cbFinished);
       break;
 
@@ -215,10 +224,13 @@ const readFileName = async (uri: vscode.Uri, fileContext: string) => {
           .pipe(options.generateSourcemapCss ? sourcemaps.init({ largeFile: true }) : util.noop())
           .pipe(less())
           .on('error', cbError)
-          .pipe(cssmin({ compatibility: "ie7" }))
+          .pipe(cssmin({ processImport: false, compatibility: "ie7" }))
+          .on('error', cbError)
           .pipe(rename({ suffix: ".min" }))
           .pipe(options.generateSourcemapCss ? sourcemaps.write('./') : util.noop())
-          .pipe(dest(outputPath));
+          .pipe(dest(outputPath))
+          .on('error', cbError)
+          ;
       
       src(path)
         .pipe(options.generateSourcemapCss ? sourcemaps.init({ largeFile: true }) : util.noop())
@@ -226,6 +238,7 @@ const readFileName = async (uri: vscode.Uri, fileContext: string) => {
         .on('error', cbError)
         .pipe(options.generateSourcemapCss ? sourcemaps.write('./') : util.noop())
         .pipe(dest(outputPath))
+        .on('error', cbError)
         .on('finish', cbFinished);
       break;
 
@@ -240,6 +253,7 @@ const readFileName = async (uri: vscode.Uri, fileContext: string) => {
           .pipe(rename({ suffix: ".min" }))
           .pipe(options.generateSourcemapJs ? sourcemaps.write('./') : util.noop())
           .pipe(dest(outputPath))
+          .on('error', cbError)
           .on('finish', cbFinished);
 
       src(path)
@@ -248,6 +262,7 @@ const readFileName = async (uri: vscode.Uri, fileContext: string) => {
         .on('error', cbError)
         .pipe(options.generateSourcemapJs ? sourcemaps.write('./') : util.noop())
         .pipe(dest(outputPath))
+        .on('error', cbError)
         .on('finish', cbFinished);
       break;
 
@@ -264,6 +279,7 @@ const readFileName = async (uri: vscode.Uri, fileContext: string) => {
           .pipe(rename({ suffix: ".min" }))
           .pipe(options.generateSourcemapJs ? sourcemaps.write('./') : util.noop())
           .pipe(dest(outputPath))
+          .on('error', cbError)
           .on('finish', cbFinished);
 
       src(path)
@@ -274,6 +290,7 @@ const readFileName = async (uri: vscode.Uri, fileContext: string) => {
         .on('error', cbError)
         .pipe(options.generateSourcemapJs ? sourcemaps.write('./') : util.noop())
         .pipe(dest(outputPath))
+        .on('error', cbError)
         .on('finish', cbFinished);
       break;
 
@@ -283,7 +300,9 @@ const readFileName = async (uri: vscode.Uri, fileContext: string) => {
           .pipe(jade())
           .on('error', cbError)
           .pipe(rename({ suffix: ".min", extname: options.generateHtmlExt }))
-          .pipe(dest(outputPath));
+          .pipe(dest(outputPath))
+          .on('error', cbError)
+          ;
 
       src(path)
         .pipe(
@@ -294,11 +313,12 @@ const readFileName = async (uri: vscode.Uri, fileContext: string) => {
         .on('error', cbError)
         .pipe(rename({ extname: options.generateHtmlExt }))
         .pipe(dest(outputPath))
+        .on('error', cbError)
         .on('finish', cbFinished);
       break;
 
     case ".pug":
-      try { 
+      try {  // catches from empty>promise.reject
         if (options.generateMinifiedHtml)
           src(path)
             .pipe(
@@ -318,7 +338,9 @@ const readFileName = async (uri: vscode.Uri, fileContext: string) => {
                 extname: options.generateHtmlExt
               })
             )
-            .pipe(dest(outputPath));
+            .pipe(dest(outputPath))
+            .on('error', cbError)
+            ;
 
         src(path)
           .pipe(
@@ -338,6 +360,7 @@ const readFileName = async (uri: vscode.Uri, fileContext: string) => {
             })
           )
           .pipe(dest(outputPath))
+          .on('error', cbError)
           .on('finish', cbFinished);
 
         } catch(e) {}
@@ -358,7 +381,9 @@ const readFileName = async (uri: vscode.Uri, fileContext: string) => {
               extname: options.generateHtmlExt
             })
           )
-          .pipe(dest(outputPath));
+          .pipe(dest(outputPath))
+          .on('error', cbError)
+          ;
 
       src(path)
         .pipe(dest(outputPath))

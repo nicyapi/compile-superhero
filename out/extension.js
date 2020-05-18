@@ -118,6 +118,7 @@ const readFileName = (uri, fileContext) => __awaiter(void 0, void 0, void 0, fun
         "generateHtmlExt": config.get("x-generate-html-ext"),
         "compileFilesInMixinFolders": config.get("x-compile-files-in-mixin-folders"),
         "compileFilesOnSave": config.get("x-compile-files-on-save"),
+        "omitDevExtJs": config.get("x-omit-dev-ext-js"),
     };
     if (!options.compileFilesOnSave)
         return;
@@ -154,10 +155,12 @@ const readFileName = (uri, fileContext) => __awaiter(void 0, void 0, void 0, fun
                 src(path)
                     .pipe(options.generateSourcemapCss ? sourcemaps.init({ largeFile: true }) : util.noop())
                     .pipe(empty(text))
-                    .pipe(cssmin({ compatibility: "ie7" }))
+                    .pipe(cssmin({ processImport: false, compatibility: "ie7" }))
+                    .on('error', cbError)
                     .pipe(rename({ extname: ".css", suffix: ".min" }))
                     .pipe(options.generateSourcemapCss ? sourcemaps.write('./') : util.noop())
-                    .pipe(dest(outputPath));
+                    .pipe(dest(outputPath))
+                    .on('error', cbError);
             src(path)
                 .pipe(options.generateSourcemapCss ? sourcemaps.init({ largeFile: true }) : util.noop())
                 .pipe(empty(text))
@@ -166,6 +169,7 @@ const readFileName = (uri, fileContext) => __awaiter(void 0, void 0, void 0, fun
             }))
                 .pipe(options.generateSourcemapCss ? sourcemaps.write('./') : util.noop())
                 .pipe(dest(outputPath))
+                .on('error', cbError)
                 .on('finish', cbFinished);
             break;
         case ".js":
@@ -185,16 +189,18 @@ const readFileName = (uri, fileContext) => __awaiter(void 0, void 0, void 0, fun
                     .on('error', cbError)
                     .pipe(rename({ suffix: ".min" }))
                     .pipe(options.generateSourcemapJs ? sourcemaps.write('./') : util.noop())
-                    .pipe(dest(outputPath));
+                    .pipe(dest(outputPath))
+                    .on('error', cbError);
             src(path)
                 .pipe(options.generateSourcemapJs ? sourcemaps.init() : util.noop())
                 .pipe(babel({
                 presets: [babelEnv]
             }))
                 .on('error', cbError)
-                .pipe(rename({ suffix: ".dev" }))
+                .pipe(!options.omitDevExtJs ? rename({ suffix: '.dev' }) : util.noop())
                 .pipe(options.generateSourcemapJs ? sourcemaps.write('./') : util.noop())
                 .pipe(dest(outputPath))
+                .on('error', cbError)
                 .on('finish', cbFinished);
             break;
         case ".less":
@@ -204,16 +210,19 @@ const readFileName = (uri, fileContext) => __awaiter(void 0, void 0, void 0, fun
                     .pipe(options.generateSourcemapCss ? sourcemaps.init({ largeFile: true }) : util.noop())
                     .pipe(less())
                     .on('error', cbError)
-                    .pipe(cssmin({ compatibility: "ie7" }))
+                    .pipe(cssmin({ processImport: false, compatibility: "ie7" }))
+                    .on('error', cbError)
                     .pipe(rename({ suffix: ".min" }))
                     .pipe(options.generateSourcemapCss ? sourcemaps.write('./') : util.noop())
-                    .pipe(dest(outputPath));
+                    .pipe(dest(outputPath))
+                    .on('error', cbError);
             src(path)
                 .pipe(options.generateSourcemapCss ? sourcemaps.init({ largeFile: true }) : util.noop())
                 .pipe(less())
                 .on('error', cbError)
                 .pipe(options.generateSourcemapCss ? sourcemaps.write('./') : util.noop())
                 .pipe(dest(outputPath))
+                .on('error', cbError)
                 .on('finish', cbFinished);
             break;
         case ".ts":
@@ -227,6 +236,7 @@ const readFileName = (uri, fileContext) => __awaiter(void 0, void 0, void 0, fun
                     .pipe(rename({ suffix: ".min" }))
                     .pipe(options.generateSourcemapJs ? sourcemaps.write('./') : util.noop())
                     .pipe(dest(outputPath))
+                    .on('error', cbError)
                     .on('finish', cbFinished);
             src(path)
                 .pipe(options.generateSourcemapJs ? sourcemaps.init() : util.noop())
@@ -234,6 +244,7 @@ const readFileName = (uri, fileContext) => __awaiter(void 0, void 0, void 0, fun
                 .on('error', cbError)
                 .pipe(options.generateSourcemapJs ? sourcemaps.write('./') : util.noop())
                 .pipe(dest(outputPath))
+                .on('error', cbError)
                 .on('finish', cbFinished);
             break;
         case ".tsx":
@@ -249,6 +260,7 @@ const readFileName = (uri, fileContext) => __awaiter(void 0, void 0, void 0, fun
                     .pipe(rename({ suffix: ".min" }))
                     .pipe(options.generateSourcemapJs ? sourcemaps.write('./') : util.noop())
                     .pipe(dest(outputPath))
+                    .on('error', cbError)
                     .on('finish', cbFinished);
             src(path)
                 .pipe(options.generateSourcemapJs ? sourcemaps.init() : util.noop())
@@ -258,6 +270,7 @@ const readFileName = (uri, fileContext) => __awaiter(void 0, void 0, void 0, fun
                 .on('error', cbError)
                 .pipe(options.generateSourcemapJs ? sourcemaps.write('./') : util.noop())
                 .pipe(dest(outputPath))
+                .on('error', cbError)
                 .on('finish', cbFinished);
             break;
         case ".jade":
@@ -266,7 +279,8 @@ const readFileName = (uri, fileContext) => __awaiter(void 0, void 0, void 0, fun
                     .pipe(jade())
                     .on('error', cbError)
                     .pipe(rename({ suffix: ".min", extname: options.generateHtmlExt }))
-                    .pipe(dest(outputPath));
+                    .pipe(dest(outputPath))
+                    .on('error', cbError);
             src(path)
                 .pipe(jade({
                 pretty: true
@@ -274,10 +288,11 @@ const readFileName = (uri, fileContext) => __awaiter(void 0, void 0, void 0, fun
                 .on('error', cbError)
                 .pipe(rename({ extname: options.generateHtmlExt }))
                 .pipe(dest(outputPath))
+                .on('error', cbError)
                 .on('finish', cbFinished);
             break;
         case ".pug":
-            try {
+            try { // catches from empty>promise.reject
                 if (options.generateMinifiedHtml)
                     src(path)
                         .pipe(empty(yield new Promise((resolve, reject) => {
@@ -296,7 +311,8 @@ const readFileName = (uri, fileContext) => __awaiter(void 0, void 0, void 0, fun
                         suffix: ".min",
                         extname: options.generateHtmlExt
                     }))
-                        .pipe(dest(outputPath));
+                        .pipe(dest(outputPath))
+                        .on('error', cbError);
                 src(path)
                     .pipe(empty(yield new Promise((resolve, reject) => {
                     pug.render(readFileContext(path), {
@@ -314,6 +330,7 @@ const readFileName = (uri, fileContext) => __awaiter(void 0, void 0, void 0, fun
                     extname: options.generateHtmlExt
                 }))
                     .pipe(dest(outputPath))
+                    .on('error', cbError)
                     .on('finish', cbFinished);
             }
             catch (e) { }
@@ -331,7 +348,8 @@ const readFileName = (uri, fileContext) => __awaiter(void 0, void 0, void 0, fun
                     suffix: ".min",
                     extname: options.generateHtmlExt
                 }))
-                    .pipe(dest(outputPath));
+                    .pipe(dest(outputPath))
+                    .on('error', cbError);
             src(path)
                 .pipe(dest(outputPath))
                 .on('error', cbError)
