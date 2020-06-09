@@ -1,4 +1,7 @@
 # Change Log
+- 2020-06-09 Added a crash protection for errors caused from external, e.g. other plugins 
+- 2020-06-09 Fixed crashes where gulp.util was used (some of it is not working anymore)
+- 2020-06-09 Fixed light-theme issues with the config screens inputs
 - 2020-05-18 Added the `x-omit-dev-ext-js` option to disable the `.dev.js` naming to only generate `.js`
 - 2020-05-18 Changed css-minifier to not try to include imports (less/sass did so anyways if told to) - fixes a crash
 - 2020-05-18 Added errorhandling on writing to destination
