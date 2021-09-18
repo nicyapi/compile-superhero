@@ -1,11 +1,11 @@
 {
 	"compilerOptions": {
-		"module": "commonjs",
+		/* "module": "commonjs",*/
+		"moduleResolution": "node",
 		"target": "es6",
 		"outDir": "../out",
 		"lib": [
-			"ES6",
-			"DOM"
+			"es6"
 		],
 		"sourceMap": true,
 		"rootDir": "./",
@@ -14,25 +14,8 @@
 		// "noImplicitReturns": true, /* Report error when not all code paths in function return a value. */
 		// "noFallthroughCasesInSwitch": true, /* Report errors for fallthrough cases in switch statement. */
 		// "noUnusedParameters": true,  /* Report errors on unused parameters. */
-
-	//	"allowJs": true,
-	//	"outFile": "../out/extension.js"
+		"allowJs": true,
+		"outFile": "../out/extension.js"
 	},
-	//"include": [
-	//	"extension.ts"
-	//],
-	//"exclude": [
-	//	"lib",
-	//	"sass"
-	//]
-	"include": [
-		"*.ts",
-		"sass/*",
-		"lib/*"
-	],
-	"exclude": [
-		"configscreen/*",
-		"test/*",
-		".history/*"
-	]
+	"include": ["extension.ts"]
 }
