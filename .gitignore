@@ -3,3 +3,10 @@ node_modules
 .vscode-test/
 *.vsix
 .history
+out/test/extension.test.js
+out/test/extension.test.js.map
+out/test/index.js
+out/test/index.js.map
+package-lock.json
+src/sass/sass.sync.js
+src/tsconfig.json

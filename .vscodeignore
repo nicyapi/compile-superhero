@@ -7,7 +7,6 @@ vsc-extension-quickstart.md
 **/tsconfig.json
 **/tslint.json
 **/*.map
-**/**/*.map
 **/*.ts
 tests
 screenshots
@@ -16,4 +15,4 @@ README.CN.md
 yarn.lock
 **.vsix
 **/*.psd
-.history
+node_modules

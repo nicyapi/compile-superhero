@@ -1,36 +1,20 @@
-/*
- Known BUGs:
-  - tsx recovers after an error: done with errors. It should not output on error.
-  - sass/scss sourcemaps are no real sourcemaps (they are based on compiled sass/scss)
-  - sass/scss compiles because of proccess.chdir(sassfile_root) -> this should not be.
-*/
-import * as vscode from 'vscode';
+import * as vscode from "vscode";
 import * as fs from "fs";
 import * as p from "path";
 import { exec } from "child_process";
-import SassHelper from "./sass/index";
-const { src, dest } = require("gulp"); 
-const uglify = require("gulp-uglify");
-const rename = require("gulp-rename");
-const babel = require("gulp-babel");
-const babelEnv = require("@babel/preset-env");
-const less = require("gulp-less");
-const cssmin = require("gulp-minify-css");
-const ts = require("gulp-typescript");
-const jade = require("gulp-jade");
-const pug = require("pug");
-const sourcemaps = require("gulp-sourcemaps");
-const open = require("open");
-const through = require("through2");
-const applySourceMap = require('vinyl-sourcemaps-apply');
-const htmlmin = require('gulp-htmlmin');
-
-const util_noop = () => through.obj(); /* not working anymore gulp.`util`.noop() */
-
-import * as configscreen from "./lib/configscreen";
-
-const sass = new SassHelper();
-
+import { compileSass, sass } from "./sass/index";
+import { src, dest } from "gulp";
+import * as uglify from "gulp-uglify";
+import * as rename from "gulp-rename";
+import * as babel from "gulp-babel";
+import * as babelEnv from "@babel/preset-env";
+import * as less from "gulp-less";
+import * as cssmin from "gulp-minify-css";
+import * as ts from "gulp-typescript";
+import * as jade from "gulp-jade";
+import * as pug from "pug";
+import * as open from "open";
+import * as through from "through2";
 const readFileContext = (path: string): string => {
   return fs.readFileSync(path).toString();
 };
@@ -59,68 +43,49 @@ const transformPort = (data: string): string => {
   });
   return port;
 };
-const empty = function(code: string, map?: any) {
+const empty = function(code: string) {
   let stream = through.obj((file: any, encoding: any, callback: any) => {
     //debugger;
     if (!file.isBuffer()) {
       return callback();
     }
     file.contents = Buffer.from(code || "");
-    
-    if (file.sourceMap && map) {
-      applySourceMap(file, map);
-    }
-
     stream.push(file);
     callback();
   });
   return stream;
 };
 
-const readFileName = async (uri: vscode.Uri, fileContext: string) => {
-  let path = uri.fsPath;
+const readFileName = async (path: string, fileContext: string) => {
   let fileSuffix = fileType(path);
   let config = vscode.workspace.getConfiguration("compile-hero");
   let outputDirectoryPath: any = {
-    ".html": config.get<string>("html-output-directory") || "",
-    ".js":   config.get<string>("javascript-output-directory") || "",
+    ".js": config.get<string>("javascript-output-directory") || "",
     ".scss": config.get<string>("sass-output-directory") || "",
     ".sass": config.get<string>("sass-output-directory") || "",
     ".less": config.get<string>("less-output-directory") || "",
     ".jade": config.get<string>("jade-output-directory") || "",
-    ".ts":   config.get<string>("typescript-output-directory") || "",
-    ".tsx":  config.get<string>("typescriptx-output-directory") || "",
-    ".pug":  config.get<string>("pug-output-directory") || ""
+    ".ts": config.get<string>("typescript-output-directory") || "",
+    ".tsx": config.get<string>("typescriptx-output-directory") || "",
+    ".pug": config.get<string>("pug-output-directory") || ""
   };
   let compileStatus: any = {
-    ".html": config.get<boolean>("html-output-toggle"),
-    ".js":   config.get<boolean>("javascript-output-toggle"),
+    ".js": config.get<boolean>("javascript-output-toggle"),
     ".scss": config.get<boolean>("sass-output-toggle"),
     ".sass": config.get<boolean>("sass-output-toggle"),
     ".less": config.get<boolean>("less-output-toggle"),
     ".jade": config.get<boolean>("jade-output-toggle"),
-    ".ts":   config.get<boolean>("typescript-output-toggle"),
-    ".tsx":  config.get<boolean>("typescriptx-output-toggle"),
-    ".pug":  config.get<boolean>("pug-output-toggle")
+    ".ts": config.get<boolean>("typescript-output-toggle"),
+    ".tsx": config.get<boolean>("typescriptx-output-toggle"),
+    ".pug": config.get<boolean>("pug-output-toggle")
   };
   if (!compileStatus[fileSuffix]) return;
 
   let options: any = {
+    "compileErrorMsg": config.get<boolean>("x-show-compileerror-message"),
     "generateMinifiedHtml": config.get<boolean>("x-generate-minified-html"),
-    "generateMinifiedCss":  config.get<boolean>("x-generate-minified-css"),
-    "generateMinifiedJs":   config.get<boolean>("x-generate-minified-js"),
-    "generateSourcemapCss": config.get<boolean>("x-generate-sourcemap-css"),
-    "generateSourcemapJs":  config.get<boolean>("x-generate-sourcemap-js"),
-
-    "compileErrorMsg":      config.get<boolean>("x-show-compile-error-messages"),
-    "generateHtmlExt":      config.get<boolean>("x-generate-html-ext"),
-    "compileFilesInMixinFolders": config.get<boolean>("x-compile-files-in-mixin-folders"),
-    "compileFilesOnSave":   config.get<boolean>("x-compile-files-on-save"),
-
-    "omitDevExtJs":         config.get<boolean>("x-omit-dev-ext-js"),
+    "generateHtmlExt": config.get<boolean>("x-generate-html-ext"),
   }
-  if (!options.compileFilesOnSave) return;
-  if (!options.compileFilesInMixinFolders && /[\/\\]mixin(s)*[\/\\]/.test(path)) { console.info('ignoring mixin', path);  return; }
 
   const cbFinished = function() {
     vscode.window.setStatusBarMessage(`Compile-Superhero: successful!`);
@@ -134,285 +99,174 @@ const readFileName = async (uri: vscode.Uri, fileContext: string) => {
     if (this && this._writableState) this._writableState.finalCalled = true; // cancel further piping.
   };
   
+
   let outputPath = p.resolve(path, "../", outputDirectoryPath[fileSuffix]);
-
   vscode.window.setStatusBarMessage(`Compiling ...`);
+  switch (fileSuffix) {
 
-  try {
+    case ".sass":
+    case ".scss":
+      let done:any = await compileSass(fileContext, {
+        indentedSyntax: fileSuffix === ".sass" ? 1 : 0,
+        style: sass.style.expanded || sass.style.compressed
+      });
 
-    switch (fileSuffix) {
+      if (done.status || done.formatted) {
+        cbError(new Error('SASS: ' + path + ': ' + (done.message || done.formatted) + (done.line ? ' (@' + done.line + ':' + done.column + ')' : '') ));
+        break;
+      }
+      let text = done.text;
+      src(path)
+        .pipe(empty(text))
+        .pipe(
+          rename({
+            extname: ".css"
+          })
+        )
+        .pipe(dest(outputPath))
+        .pipe(cssmin({ compatibility: "ie7" }))
+        .on('error', cbError)
+        .pipe(
+          rename({
+            extname: ".css",
+            suffix: ".min"
+          })
+        )
+        .pipe(dest(outputPath))
+        .on('finish', cbFinished);
+      break;
 
-      case ".sass":
-      case ".scss":
-        let done = await sass.compileOne(uri, {
-          indentedSyntax: fileSuffix === ".sass" ? 1 : 0,
-          style: SassHelper.style.expanded,   // || SassHelper.style.compressed
-          // sourceMapFile: 'file', sourceMapRoot: 'root',    -> https://github.com/medialize/sass.js/blob/master/docs/api.md#sourcemap-options
-        });
+    case ".js":
+      if (/.dev.js|.prod.js$/g.test(path)) {
+        cbFinished();
+        vscode.window.showErrorMessage(
+          'The prod or dev file is the allready processed file and will not be compiled: ' + path
+        );
+        break;
+      }
+      src(path)
+        .pipe(
+          babel({
+            presets: [babelEnv as string] //HACK
+          })
+        )
+        .on('error', cbError)
+        .pipe(rename({ suffix: ".dev" }))
+        .pipe(dest(outputPath));
 
-        if (done.status || done.formatted) {
-          cbError(new Error('SASS: ' + path + ': ' + (done.message || done.formatted) + (done.line ? ' (@' + done.line + ':' + done.column + ')' : '') ));
-          break;
-        }
-        let text = done.text;
-        if (options.generateMinifiedCss)
-          src(path)
-            .pipe(options.generateSourcemapCss ? sourcemaps.init({ largeFile: true }) : util_noop())
-            .pipe(empty(text))
-            .pipe(cssmin({ processImport: false, compatibility: "ie7" }))
-            .on('error', cbError)
-            .pipe(rename({ extname: ".css", suffix: ".min" }))
-            .pipe(options.generateSourcemapCss ? sourcemaps.write('./') : util_noop())
-            .pipe(dest(outputPath))
-            .on('error', cbError)
-            ;
+      src(path)
+        .pipe(
+          babel({
+            presets: [babelEnv as string] //HACK
+          })
+        )
+        .on('error', cbError)
+        .pipe(uglify())
+        .on('error', cbError)
+        .pipe(rename({ suffix: ".prod" }))
+        .pipe(dest(outputPath))
+        .on('finish', cbFinished);
+      break;
 
+    case ".less":
+      src(path)
+        .pipe(less())
+        .on('error', cbError)
+        .pipe(dest(outputPath))
+        .pipe(cssmin({ compatibility: "ie7" }))
+        .pipe(rename({ suffix: ".min" }))
+        .pipe(dest(outputPath))
+        .on('finish', cbFinished);
+      break;
+
+    case ".ts":
+      src(path)
+        .pipe(ts())
+        .on('error', cbError)
+        .pipe(dest(outputPath))
+        .on('finish', cbFinished);
+      break;
+
+    case ".tsx":
+      src(path)
+        .pipe(
+          ts({
+            jsx: "react"
+          })
+        )
+        .on('error', cbError)
+        .pipe(dest(outputPath))
+        .on('finish', cbFinished);
+      break;
+
+    case ".jade":
+      if (options.generateMinifiedHtml)
         src(path)
-          .pipe(options.generateSourcemapCss ? sourcemaps.init({ largeFile: true }) : util_noop())
-          .pipe(empty(text))
+          .pipe(jade())
+          .on('error', cbError)
+          .pipe(rename({ suffix: ".min", extname: options.generateHtmlExt }))
+          .pipe(dest(outputPath));
+
+      src(path)
+        .pipe(
+          jade({
+            pretty: true
+          })
+        )
+        .on('error', cbError)
+        .pipe(rename({ extname: options.generateHtmlExt }))
+        .pipe(dest(outputPath))
+        .on('finish', cbFinished);
+      break;
+
+    case ".pug":
+      if (options.generateMinifiedHtml)
+        src(path)
+          .pipe(
+            empty(
+              await new Promise<string>((resolve, reject) => {
+                pug.render(readFileContext(path), {
+                  pretty: false
+                }, (err: any, data: string) => { if (err) {cbError(err); reject(err);} else resolve(data); } )
+              })
+            )
+          )
+          .on('error', cbError)
           .pipe(
             rename({
-              extname: ".css"
+              suffix: ".min",
+              extname: options.generateHtmlExt
             })
           )
-          .pipe(options.generateSourcemapCss ? sourcemaps.write('./') : util_noop())
-          .pipe(dest(outputPath))
-          .on('error', cbError)
-          .on('finish', cbFinished);
-        break;
+          .pipe(dest(outputPath));
 
-      case ".js":
-        if (/\.dev\.js|\.prod\.js|\.min\.js$/g.test(path)) {
-          cbFinished();
-          vscode.window.showErrorMessage(
-            'The prod (.min.js) or dev file is the allready processed file and will not be compiled: ' + path
-          );
-          break;
-        }
-        if (options.generateMinifiedJs)
-          src(path)
-            .pipe(options.generateSourcemapJs ? sourcemaps.init() : util_noop())
-            .pipe(
-              babel({
-                presets: [babelEnv]
-              })
-            )
-            .on('error', cbError)
-            .pipe(uglify())
-            .on('error', cbError)
-            .pipe(rename({ suffix: ".min" }))
-            .pipe(options.generateSourcemapJs ? sourcemaps.write('./') : util_noop())
-            .pipe(dest(outputPath))
-            .on('error', cbError)
-            ;
-
-        src(path)
-          .pipe(options.generateSourcemapJs ? sourcemaps.init() : util_noop())
-          .pipe(
-            babel({
-              presets: [babelEnv]
+      src(path)
+        .pipe(
+          empty(
+            await new Promise<string>((resolve, reject) => {
+              pug.render(readFileContext(path), {
+                pretty: true
+              }, (err: any, data: string) => { if (err) {cbError(err); reject(err);} else resolve(data); } )
             })
           )
-          .on('error', cbError)
-          .pipe(!options.omitDevExtJs ? rename({ suffix: '.dev' }) : util_noop())
-          .pipe(options.generateSourcemapJs ? sourcemaps.write('./') : util_noop())
-          .pipe(dest(outputPath))
-          .on('error', cbError)
-          .on('finish', cbFinished);
-        break;
+        )
+        .on('error', cbError)
+        .pipe(
+          rename({
+            extname: options.generateHtmlExt
+          })
+        )
+        .pipe(dest(outputPath))
+        .on('finish', cbFinished);
+      break;
 
-      case ".less":
-        if (options.generateMinifiedCss)
-          src(path)
-            .pipe(src(path))
-            .pipe(options.generateSourcemapCss ? sourcemaps.init({ largeFile: true }) : util_noop())
-            .pipe(less())
-            .on('error', cbError)
-            .pipe(cssmin({ processImport: false, compatibility: "ie7" }))
-            .on('error', cbError)
-            .pipe(rename({ suffix: ".min" }))
-            .pipe(options.generateSourcemapCss ? sourcemaps.write('./') : util_noop())
-            .pipe(dest(outputPath))
-            .on('error', cbError)
-            ;
-        
-        src(path)
-          .pipe(options.generateSourcemapCss ? sourcemaps.init({ largeFile: true }) : util_noop())
-          .pipe(less())
-          .on('error', cbError)
-          .pipe(options.generateSourcemapCss ? sourcemaps.write('./') : util_noop())
-          .pipe(dest(outputPath))
-          .on('error', cbError)
-          .on('finish', cbFinished);
-        break;
-
-      case ".ts":
-        if (options.generateMinifiedJs)
-          src(path)
-            .pipe(options.generateSourcemapJs ? sourcemaps.init() : util_noop())
-            .pipe(ts())
-            .on('error', cbError)
-            .pipe(uglify())
-            .on('error', cbError)
-            .pipe(rename({ suffix: ".min" }))
-            .pipe(options.generateSourcemapJs ? sourcemaps.write('./') : util_noop())
-            .pipe(dest(outputPath))
-            .on('error', cbError)
-            .on('finish', cbFinished);
-
-        src(path)
-          .pipe(options.generateSourcemapJs ? sourcemaps.init() : util_noop())
-          .pipe(ts())
-          .on('error', cbError)
-          .pipe(options.generateSourcemapJs ? sourcemaps.write('./') : util_noop())
-          .pipe(dest(outputPath))
-          .on('error', cbError)
-          .on('finish', cbFinished);
-        break;
-
-      case ".tsx":
-        if (options.generateMinifiedJs)
-          src(path)
-            .pipe(options.generateSourcemapJs ? sourcemaps.init() : util_noop())
-            .pipe(ts({
-              jsx: "react"
-            }))
-            .on('error', cbError)
-            .pipe(uglify())
-            .on('error', cbError)
-            .pipe(rename({ suffix: ".min" }))
-            .pipe(options.generateSourcemapJs ? sourcemaps.write('./') : util_noop())
-            .pipe(dest(outputPath))
-            .on('error', cbError)
-            .on('finish', cbFinished);
-
-        src(path)
-          .pipe(options.generateSourcemapJs ? sourcemaps.init() : util_noop())
-          .pipe(ts({
-            jsx: "react"
-          }))
-          .on('error', cbError)
-          .pipe(options.generateSourcemapJs ? sourcemaps.write('./') : util_noop())
-          .pipe(dest(outputPath))
-          .on('error', cbError)
-          .on('finish', cbFinished);
-        break;
-
-      case ".jade":
-        if (options.generateMinifiedHtml)
-          src(path)
-            .pipe(jade())
-            .on('error', cbError)
-            .pipe(rename({ suffix: ".min", extname: options.generateHtmlExt }))
-            .pipe(dest(outputPath))
-            .on('error', cbError)
-            ;
-
-        src(path)
-          .pipe(
-            jade({
-              pretty: true
-            })
-          )
-          .on('error', cbError)
-          .pipe(rename({ extname: options.generateHtmlExt }))
-          .pipe(dest(outputPath))
-          .on('error', cbError)
-          .on('finish', cbFinished);
-        break;
-
-      case ".pug":
-        try {  // catches from empty>promise.reject
-          if (options.generateMinifiedHtml)
-            src(path)
-              .pipe(
-                empty(
-                  await new Promise<string>((resolve, reject) => {
-                    pug.render(readFileContext(path), {
-                      filename: path,
-                      pretty: false
-                    }, (err: any, data: string) => { if (err) {cbError(err); reject(err);} else resolve(data); } )
-                  })
-                )
-              )
-              .on('error', cbError)
-              .pipe(
-                rename({
-                  suffix: ".min",
-                  extname: options.generateHtmlExt
-                })
-              )
-              .pipe(dest(outputPath))
-              .on('error', cbError)
-              ;
-
-          src(path)
-            .pipe(
-              empty(
-                await new Promise<string>((resolve, reject) => {
-                  pug.render(readFileContext(path), {
-                    filename: path,
-                    pretty: true
-                  }, (err: any, data: string) => { if (err) {cbError(err); reject(err);} else resolve(data); } )
-                })
-              )
-            )
-            .on('error', cbError)
-            .pipe(
-              rename({
-                extname: options.generateHtmlExt
-              })
-            )
-            .pipe(dest(outputPath))
-            .on('error', cbError)
-            .on('finish', cbFinished);
-
-          } catch(e) {}
-        break;
-
-      case ".html":
-        if (options.generateMinifiedHtml)
-          src(path)
-            .pipe(htmlmin({
-              collapseWhitespace: true,
-              caseSensitive: true,
-              continueOnParseError: false,
-            }))
-            .on('error', cbError)
-            .pipe(
-              rename({
-                suffix: ".min",
-                extname: options.generateHtmlExt
-              })
-            )
-            .pipe(dest(outputPath))
-            .on('error', cbError)
-            ;
-
-        src(path)
-          .pipe(dest(outputPath))
-          .on('error', cbError)
-          .on('finish', cbFinished);
-        break;
-
-      default:
-        console.error("Not Found!");
-        break;
-    }
-  }
-  catch(ex) {
-    cbError(ex);
+    default:
+      console.error("Not Found!");
+      break;
   }
 };
 export function activate(context: vscode.ExtensionContext) {
-  configscreen.activate(context);
-
   console.log('Extension "compile-superhero" is ready now!');
-
-  if (vscode.workspace.getConfiguration("compile-hero")
-    .get<boolean>("x-compile-files-on-save"))
-    vscode.window.setStatusBarMessage(`Compile-Superhero: watching ...`);
-    
   let openInBrowser = vscode.commands.registerCommand(
     "extension.openInBrowser",
     path => {
@@ -453,44 +307,21 @@ export function activate(context: vscode.ExtensionContext) {
   );
   let compileFile = vscode.commands.registerCommand(
     "extension.compileFile",
-    (uri: vscode.Uri) => {
-      console.log(uri.fsPath);
-      const fileContext: string = readFileContext(uri.fsPath);
+    path => {
+      let uri = path.fsPath;
+      console.log(uri);
+      const fileContext: string = readFileContext(uri);
       readFileName(uri, fileContext);
     }
-  );
-  let generateLocalDefaultConfig = vscode.commands.registerCommand(
-    "extension.generateLocalDefaultConfig",
-    async () => {
-      if (vscode.workspace.workspaceFolders) {
-        const config = vscode.workspace.getConfiguration('compile-hero');
-
-        for (let x in config) {
-          let e = config.inspect(x);
-          if (e?.defaultValue === undefined) continue;
-          
-          try {
-            await config.update(x, e?.workspaceValue !== undefined ? e?.workspaceValue : e?.globalValue !== undefined ? e?.globalValue : e?.defaultValue, vscode.ConfigurationTarget.Workspace);
-          }
-          catch(e) {
-            console.error(x, e);
-          }
-
-        };
-      }
-
-    }
-
   );
 
   context.subscriptions.push(openInBrowser);
   context.subscriptions.push(closePort);
   context.subscriptions.push(compileFile);
-  context.subscriptions.push(generateLocalDefaultConfig);
   vscode.workspace.onDidSaveTextDocument(document => {
-    const { uri } = document;
-    const fileContext: string = readFileContext(uri.fsPath);
-    readFileName(uri, fileContext);
+    const { fileName } = document;
+    const fileContext: string = readFileContext(fileName);
+    readFileName(fileName, fileContext);
   });
 }
 export function deactivate() {}
